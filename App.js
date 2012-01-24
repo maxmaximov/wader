@@ -1,10 +1,10 @@
 /**
  * Base application class
  *
- * Contains various helper methods, Pub\Sub system, store and handle "Controller" modules.
+ * Contains various helper methods, store and handle "Controller" modules.
  *
  * @author
- * @version 0.1.5
+ * @version 0.2
  */
 define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/ADeferredModule"], function(Router, Hub, Logger, IModule, ADeferredModule) {
     "use strict";

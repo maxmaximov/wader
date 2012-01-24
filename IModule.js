@@ -1,3 +1,9 @@
+/**
+ * App Module Interface
+ *
+ * @author Max Maximov <max.maximov@gmail.com>
+ * @version 0.2
+ */
 define("app/IModule", ["app/Hub", "app/Logger"], function(Hub, Logger) {
     "use strict";
 

@@ -1,4 +1,4 @@
-/*
+/**
  * App Router module
  *
  * Simple url routing system
@@ -16,7 +16,7 @@
  * ]
  *
  * @author Andrew Tereshko <andrew.tereshko@gmail.com>
- * @version 0.1.3
+ * @version 0.2
  */
 define("app/Router", ["app/Hub", "app/Logger"], function(Hub, Logger) {
     "use strict";

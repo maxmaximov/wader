@@ -1,8 +1,8 @@
-/*
+/**
  * App PubSub Hub module
  *
  * @author Max Maximov <max.maximov@gmail.com>
- * @version 0.1
+ * @version 0.2
  */
 define("app/Hub", ["app/Logger"], function (Logger) {
     "use strict";
@@ -15,13 +15,13 @@ define("app/Hub", ["app/Logger"], function (Logger) {
         pub: function (channel, data) {
             data = data || {};
 
-            Logger.log("Publish to channel " + channel, data);
+            Logger.log("Publish to channel \"" + channel + "\"", data);
 
             this._domNode.trigger.apply(this._domNode, arguments);
         },
 
         sub: function (channel, callback) {
-            Logger.log("Subscribed to channel " + channel);
+            Logger.log("Subscribed to channel \"" + channel + "\"");
 
             function wrapper() {
                 return callback.apply(this, Array.prototype.slice.call(arguments, 1));
@@ -33,7 +33,7 @@ define("app/Hub", ["app/Logger"], function (Logger) {
         },
 
         unsub: function (channel, callback) {
-            Logger.log("Unsubscribed from channel " + channel);
+            Logger.log("Unsubscribed from channel \"" + channel + "\"");
 
             this._domNode.unbind(channel + ".app", callback);
         }

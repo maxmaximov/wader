@@ -1,8 +1,8 @@
-/*
+/**
  * App Logger module
  *
  * @author Max Maximov <max.maximov@gmail.com>
- * @version 0.1
+ * @version 0.2
  */
 define("app/Logger", ["app/Hub"], function (Hub) {
     "use strict";
@@ -12,10 +12,7 @@ define("app/Logger", ["app/Hub"], function (Hub) {
     {
         debug: false,
 
-        init: function () {
-        },
-
-        parseArgs: function () {
+        _parseArgs: function () {
             var args = _.toArray(arguments[0]);
 
             // Тут бы, по-хорошему, интерфейс нужен, вместо typeof args[0] == "object"
@@ -23,7 +20,7 @@ define("app/Logger", ["app/Hub"], function (Hub) {
         },
 
         log: function () {
-            var args = app.Logger.parseArgs(arguments);
+            var args = app.Logger._parseArgs(arguments);
 
             if (this.debug && window.console && window.console.log) {
                 if (ie) {
