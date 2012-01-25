@@ -151,20 +151,17 @@ init()
 
 ``` javascript
 require([ "app/App" ], function(App) {
-    // Правила для роутера вида ( Класс (контроллер) : массив правил ). Правила могут быть строкой или регулярным выражением.
     var moduleRoutes = {
         "app.module.Common" : [ /.*/ ],
         "app.module.CategoryList" : [ "product/category/list" ],
         "app.module.CategoryEdit" : [ "product/category/edit" ]
     };
 
-    // Инициализация ядра приложения
     var app = new App.getInstance({
         routes: moduleRoutes,
         baseNamespace: "App"
     });
     
-    // Первый запуск ( Последующие сработают автоматически при смене url )
     app.run();
 });
 ```
