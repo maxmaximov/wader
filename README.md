@@ -141,10 +141,6 @@ init()
 
 ### Единая точка входа
 
-Подключается директивой "data-main" в тeге <script> используемом для require.js
-
-`<script data-main="/js/main" src="/js/require.js"></script>`
-
 Пример содержимого:
 
 ``` javascript
