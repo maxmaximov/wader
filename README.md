@@ -141,26 +141,32 @@ init()
 
 ### Единая точка входа
 
+Подключается директивой "data-main" в тeге <script> используемом для require.js:
+
+```html
+<script data-main="/js/main" src="/js/require.js"></script>
+```
+
 Пример содержимого:
 
 ``` javascript
-    require([ "app/App" ], function(App) {
-        // Правила для роутера вида ( Класс (контроллер) : массив правил ). Правила могут быть строкой или регулярным выражением.
-        var moduleRoutes = {
-            "app.module.Common" : [ /.*/ ],
-            "app.module.CategoryList" : [ "product/category/list" ],
-            "app.module.CategoryEdit" : [ "product/category/edit" ]
-        };
+require([ "app/App" ], function(App) {
+    // Правила для роутера вида ( Класс (контроллер) : массив правил ). Правила могут быть строкой или регулярным выражением.
+    var moduleRoutes = {
+        "app.module.Common" : [ /.*/ ],
+        "app.module.CategoryList" : [ "product/category/list" ],
+        "app.module.CategoryEdit" : [ "product/category/edit" ]
+    };
 
-        // Инициализация ядра приложения
-        var app = new App.getInstance({
-            routes: moduleRoutes,
-            baseNamespace: "App"
-        });
-    
-        // Первый запуск ( Последующие сработают автоматически при смене url )
-        app.run();
+    // Инициализация ядра приложения
+    var app = new App.getInstance({
+        routes: moduleRoutes,
+        baseNamespace: "App"
     });
+    
+    // Первый запуск ( Последующие сработают автоматически при смене url )
+    app.run();
+});
 ```
 
 ### TODO для документации
