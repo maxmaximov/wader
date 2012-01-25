@@ -3,7 +3,7 @@
  *
  * Contains various helper methods, store and handle "Controller" modules.
  *
- * @author
+ * @author Andrew Tereshko <andrew.tereshko@gmail.com>
  * @version 0.2
  */
 define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/ADeferredModule"], function(Router, Hub, Logger, IModule, ADeferredModule) {
