@@ -10,7 +10,7 @@
 -----------
 
 * jQuery
-* jQuery.Class
+* jQuery.Class (из JavaScriptMVC)
 * History.js
 * Require.js
 * Underscore.js
