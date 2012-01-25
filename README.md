@@ -1,7 +1,6 @@
 Общая информация
 ================
-
-"Фреймворк" построенный на принципе MVC ( HMVC ) с учётом особенностей языка.
+«Фреймворк» построенный на принципе MVC (HMVC) с учётом особенностей языка.
 
 * Блекджек и блудницы
 * Единая точка входа
@@ -27,7 +26,7 @@ inital release
 0.1.1
 -----
 
-* Система роутинга ( App.Route );
+* Система роутинга (App.Route);
 
 0.1.2
 -----
@@ -152,30 +151,34 @@ init()
 
 Реализует (пока) только long-polling. Реализован (пока) как синглтон.
 
-``` html
-<script data-main="/js/main" src="/js/require.js"></script>
-```
-
 Пример использования
 ====================
 
 Единая точка входа
 ------------------
 
+``` html
+<script data-main="/js/main" src="/js/require.js"></script>
+```
+
+Пример содержимого:
 
 ``` javascript
 require([ "app/App" ], function(App) {
+    // Правила для роутера вида (Класс (контроллер) : массив правил). Правила могут быть строкой или регулярным выражением
     var moduleRoutes = {
-        "app.module.Common" : [ /.*/ ],
-        "app.module.CategoryList" : [ "product/category/list" ],
-        "app.module.CategoryEdit" : [ "product/category/edit" ]
+        "app.module.Common":        [/.*/],
+        "app.module.CategoryList":  ["product/category/list"],
+        "app.module.CategoryEdit":  ["product/category/edit"]
     };
 
+    // Инициализация ядра приложения
     var app = new App.getInstance({
         routes: moduleRoutes,
         baseNamespace: "App"
     });
     
+    // Первый запуск (последующие сработают автоматически при смене url)
     app.run();
 });
 ```
