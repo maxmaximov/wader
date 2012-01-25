@@ -166,6 +166,9 @@ init()
 
 Пример содержимого:
 
+test
+----
+
 ``` javascript
 require([ "app/App" ], function(App) {
     var moduleRoutes = {
@@ -182,6 +185,9 @@ require([ "app/App" ], function(App) {
     app.run();
 });
 ```
+
+test
+----
 
 TODO для документации
 ---------------------
