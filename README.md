@@ -143,7 +143,7 @@ init()
 
 Подключается директивой "data-main" в тeге <script> используемом для require.js:
 
-```html
+``` html
 <script data-main="/js/main" src="/js/require.js"></script>
 ```
 
