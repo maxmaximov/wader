@@ -12,8 +12,10 @@ define("app/Logger", ["app/Hub"], function (Hub) {
     {
         debug: false,
 
+        ie: false,
+
         _parseArgs: function () {
-            var args = _.toArray(arguments[0]);
+            var args = Array.prototype.slice.call(arguments[0]);
 
             // Тут бы, по-хорошему, интерфейс нужен, вместо typeof args[0] == "object"
             return ([typeof args[0] == "object" ? "[" + args[0].constructor.fullName + "]" : args[0]].concat(args.slice(1)));
@@ -23,7 +25,7 @@ define("app/Logger", ["app/Hub"], function (Hub) {
             var args = app.Logger._parseArgs(arguments);
 
             if (this.debug && window.console && window.console.log) {
-                if (ie) {
+                if (app.Logger.ie) {
                     console.log(args.join(" "));
                 } else {
                     console.log.apply(console, args);

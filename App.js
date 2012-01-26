@@ -12,6 +12,7 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
     $.Class.extend("app.App", {
         /* @static */
         _instance: null,
+
         _whenReadies: [],
 
         getInstance: function (options) {
@@ -40,6 +41,7 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
          *
          */
         _modules: {},
+
         _modulesToReady: {},
 
         _ready: false,
@@ -168,7 +170,12 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
 
             delete(this._modulesToReady[className]);
 
-            if (_.size(this._modulesToReady) == 0) {
+            var size = 0, key;
+            for (key in this._modulesToReady) {
+                if (this._modulesToReady.hasOwnProperty(key)) size++;
+            }
+
+            if (size == 0) {
                 this._setReady();
             }
         },
@@ -180,7 +187,6 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
             this._modulesToReady = {};
             app.App._whenReadies = [];
             $(window).whenReadyKillall();
-
         },
 
         _setReady: function () {
