@@ -2,7 +2,7 @@
  * App Comet module
  *
  * @author Max Maximov <max.maximov@gmail.com>
- * @version 0.2
+ * @version 0.2.1
  */
 define("app/Comet", ["app/Hub", "app/Logger"], function(Hub, Logger) {
     "use strict";
