@@ -4,7 +4,7 @@
  * Contains various helper methods, store and handle "Controller" modules.
  *
  * @author Andrew Tereshko <andrew.tereshko@gmail.com>
- * @version 0.2
+ * @version 0.2.1
  */
 define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/ADeferredModule"], function(Router, Hub, Logger, IModule, ADeferredModule) {
     "use strict";

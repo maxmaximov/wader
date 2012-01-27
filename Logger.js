@@ -2,7 +2,7 @@
  * App Logger module
  *
  * @author Max Maximov <max.maximov@gmail.com>
- * @version 0.2
+ * @version 0.2.1
  */
 define("app/Logger", ["app/Hub"], function (Hub) {
     "use strict";
