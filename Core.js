@@ -65,24 +65,24 @@ define("ajaxer/Core", ["ajaxer/Page"], function(Page) {
         },
 
         catchedClick: function(event) {
-            //var re = new RegExp("^" + window.location.protocol + "\/\/" + window.location.host);
-            var o = $(event.target);
-            var handlers = o.data("events");
-            var ajaxerOn = !(o.data("ajaxer") && o.data("ajaxer") == "off");
-            var leftButton = (event.button == 0);
-            var isMetaKeys = (event.ctrlKey || event.altKey || event.shiftKey || event.metaKey);
+            var a = $(event.target).parents().andSelf().filter("a[href]").last();
 
-            if (ajaxerOn && leftButton && !isMetaKeys) {
-                if (event.target.nodeName.match(/^a$/i) && event.target.href && event.target.href.match(/http(?:s)?:\/\/([^\/]+).*/)[1] == location.host) {
-                    if (!event.target.onclick && !(handlers && handlers["click"])) {
-                        if (this.constructor.debug) console.log("Ajaxer: catched click on", event.target.href);
+            if (a.length > 0) {
+                var ajaxerOff = a.data("ajaxer") && a.data("ajaxer") == "off";
+                var leftButton = (event.button == 0);
+                var isMetaKey = (event.ctrlKey || event.altKey || event.shiftKey || event.metaKey);
+                var sameDomain = a.prop("href").match(/http(?:s)?:\/\/([^\/]+).*/)[1] == location.host;
+                var hasHandlers = a.prop("onclick") || (a.data("events") && a.data("events")["click"]);
 
-                        event.preventDefault();
-                        if (!this.page || this.page.getUrl() != event.target.href) {
-                            if (this.constructor.debug) console.log("Ajaxer: push state");
+                if (!ajaxerOff && leftButton && !isMetaKey && sameDomain && !hasHandlers) {
+                    if (this.constructor.debug) console.log("Ajaxer: catched click on", a.prop("href"));
 
-                            History.pushState({ ajaxer: true }, null, event.target.href);
-                        }
+                    event.preventDefault();
+
+                    if (!this.page || this.page.getUrl() != a.prop("href")) {
+                        if (this.constructor.debug) console.log("Ajaxer: push state");
+
+                        History.pushState({ ajaxer: true }, null, a.prop("href"));
                     }
                 }
             }
