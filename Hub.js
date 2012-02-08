@@ -15,13 +15,15 @@ define("app/Hub", ["app/Logger"], function (Logger) {
         pub: function (channel, data) {
             data = data || {};
 
-            Logger.log("Publish to channel \"" + channel + "\"", data);
+            Logger.info("Publish to channel \"" + channel + "\"", data);
+            //Logger.info(this, "publish to channel \"" + channel + "\"", data);
 
             this._domNode.trigger.apply(this._domNode, arguments);
         },
 
         sub: function (channel, callback) {
-            Logger.log("Subscribed to channel \"" + channel + "\"");
+            Logger.info("Subscribed to channel \"" + channel + "\"");
+            //Logger.info(this, "subscribed to channel \"" + channel + "\"");
 
             function wrapper() {
                 return callback.apply(this, Array.prototype.slice.call(arguments, 1));
@@ -33,7 +35,8 @@ define("app/Hub", ["app/Logger"], function (Logger) {
         },
 
         unsub: function (channel, callback) {
-            Logger.log("Unsubscribed from channel \"" + channel + "\"");
+            Logger.info("Unsubscribed from channel \"" + channel + "\"");
+            //Logger.info(this, "unsubscribed from channel \"" + channel + "\"");
 
             this._domNode.unbind(channel + ".app", callback);
         }
