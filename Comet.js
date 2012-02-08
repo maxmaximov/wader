@@ -10,6 +10,18 @@ define("app/Comet", ["app/Hub", "app/Logger"], function(Hub, Logger) {
     $.Class.extend("app.Comet",
     /* @static */
     {
+        _instance: null,
+
+        getInstance: function (url) {
+            if (!app.Comet._instance) app.Comet._instance = new app.Comet(url);
+            return app.Comet._instance;
+        },
+
+        send: function (channel, data) {
+            if (!app.Comet._instance) throw new Error("app.Comet: класс должен быть инстанцирован");
+
+            app.Comet.getInstance().send(channel, data);
+        }
     },
     /* @prototype */
     {
@@ -17,11 +29,28 @@ define("app/Comet", ["app/Hub", "app/Logger"], function(Hub, Logger) {
 
         init: function (url) {
             this.url = url;
-            this._poll();
+
+            var that = this;
+            setTimeout(function () { // подавляем спиннер в Файрфоксе
+                that._poll();
+            }, 1000)
+        },
+
+        send: function (channel, data) {
+            Logger.info(this, "sending to " + this.url, channel, data);
+
+            $.ajax({
+                url: this.url,
+                timeout: 10000,
+                async: true,
+                cache: false,
+                dataType: "jsonp",
+                data: { "channel": channel, "data": data }
+            });
         },
 
         _poll: function () {
-            Logger.log(this, "polling to " + this.url);
+            Logger.info(this, "polling to " + this.url);
 
             $.ajax({
                 url: this.url,
@@ -35,13 +64,13 @@ define("app/Comet", ["app/Hub", "app/Logger"], function(Hub, Logger) {
         },
 
         _onError: function (jqXHR, status, error) {
-            Logger.error(this, status, error);
+            Logger.error(this, this.url, status, error);
 
             this._poll();
         },
 
         _onSuccess: function (data) {
-            Logger.log(this, "got message", data.data, "to channel \"" + data.channel + "\"");
+            Logger.info(this, "got message", data.data, "to channel \"" + data.channel + "\"");
 
             Hub.pub(data.channel, data.data);
 
