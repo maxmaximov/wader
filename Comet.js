@@ -25,25 +25,25 @@ define("app/Comet", ["app/Hub", "app/Logger"], function(Hub, Logger) {
 
             $.ajax({
                 url: this.url,
-                complete: this.proxy("_onClose"),
-                timeout: 2000,
+                success: this.proxy("_onSuccess"),
+                error: this.proxy("_onError"),
+                timeout: 10000,
                 async: true,
-                cache: false
+                cache: false,
+                dataType: "jsonp"
             });
         },
 
-        _onClose: function (jqXHR, status) {
-            var response;
+        _onError: function (jqXHR, status, error) {
+            Logger.error(this, status, error);
 
-            if (jqXHR.readyState == 4 && jqXHR.status == 200) {
-                response = $.parseJSON(jqXHR.responseText);
+            this._poll();
+        },
 
-                Logger.log(this, "got message", response.data, "to channel \"" + response.channel + "\"");
+        _onSuccess: function (data) {
+            Logger.log(this, "got message", data.data, "to channel \"" + data.channel + "\"");
 
-                Hub.pub(response.channel, response.data);
-            } else {
-                Logger.log(this, status);
-            }
+            Hub.pub(data.channel, data.data);
 
             this._poll();
         }
