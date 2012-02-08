@@ -21,7 +21,7 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
         },
 
         when: function (selector, callback) {
-            if (!app.App._instance) throw new Error("App: класс должен быть инстанцирован");
+            if (!app.App._instance) throw new Error("app.App: класс должен быть инстанцирован");
 
             if (app.App._instance._ready) {
                 $(selector).whenReady(callback);
