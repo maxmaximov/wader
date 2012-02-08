@@ -10,7 +10,19 @@ define("app/Logger", ["app/Hub"], function (Hub) {
     $.Class.extend("app.Logger",
     /* @static */
     {
-        debug: false,
+        NONE: 0,
+
+        ERROR: 1,
+
+        WARN: 2,
+
+        INFO: 3,
+
+        DEBUG: 4,
+
+        LOG: 5,
+
+        level: 1,
 
         ie: false,
 
@@ -36,23 +48,23 @@ define("app/Logger", ["app/Hub"], function (Hub) {
         },
 
         log: function () {
-            app.Logger._echo(arguments, "log");
+            if (app.Logger.level >= app.Logger.LOG) app.Logger._echo(arguments, "log");
         },
 
         debug: function () {
-            app.Logger._echo(arguments, "debug");
-        },
-
-        warn: function () {
-            app.Logger._echo(arguments, "warn");
+            if (app.Logger.level >= app.Logger.DEBUG) app.Logger._echo(arguments, "debug");
         },
 
         info: function () {
-            app.Logger._echo(arguments, "info");
+            if (app.Logger.level >= app.Logger.INFO) app.Logger._echo(arguments, "info");
+        },
+
+        warn: function () {
+            if (app.Logger.level >= app.Logger.WARN) app.Logger._echo(arguments, "warn");
         },
 
         error: function () {
-            app.Logger._echo(arguments, "error");
+            if (app.Logger.level >= app.Logger.ERROR) app.Logger._echo(arguments, "error");
         }
     },
     /* @prototype */
