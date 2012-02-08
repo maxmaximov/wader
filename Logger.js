@@ -21,28 +21,38 @@ define("app/Logger", ["app/Hub"], function (Hub) {
             return ([typeof args[0] == "object" ? "[" + args[0].constructor.fullName + "]" : args[0]].concat(args.slice(1)));
         },
 
-        log: function () {
-            var args = app.Logger._parseArgs(arguments);
+        _echo: function (args, type) {
+            var args = app.Logger._parseArgs(args);
 
-            if (this.debug && window.console && window.console.log) {
+            /*@cc_on app.Logger.ie = true; @*/
+
+            if (app.Logger.debug && window.console && window.console[type]) {
                 if (app.Logger.ie) {
-                    console.log(args.join(" "));
+                    console[type](args.join(" "));
                 } else {
-                    console.log.apply(console, args);
+                    console[type].apply(console, args);
                 }
             }
         },
 
+        log: function () {
+            app.Logger._echo(arguments, "log");
+        },
+
+        debug: function () {
+            app.Logger._echo(arguments, "debug");
+        },
+
         warn: function () {
-            this.log(arguments);
+            app.Logger._echo(arguments, "warn");
+        },
+
+        info: function () {
+            app.Logger._echo(arguments, "info");
         },
 
         error: function () {
-            this.log(arguments);
-        },
-
-        notice: function () {
-            this.log(arguments);
+            app.Logger._echo(arguments, "error");
         }
     },
     /* @prototype */
