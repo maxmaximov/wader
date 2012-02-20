@@ -13,7 +13,6 @@
 * jQuery.Class (из JavaScriptMVC)
 * History.js
 * Require.js
-* Underscore.js
 
 История версий
 ==============
