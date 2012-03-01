@@ -15,6 +15,10 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
 
         _whenReadies: [],
 
+        _questions: {},
+
+        _answers: {},
+
         getInstance: function (options) {
             if (!app.App._instance) app.App._instance = new app.App(options);
             return app.App._instance;
@@ -28,6 +32,24 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
             } else {
                 app.App._whenReadies.push([selector, callback]);
             }
+        },
+
+        ask: function (question, callback) {
+            if (!app.App._instance) throw new Error("app.App: класс должен быть инстанцирован");
+
+            app.App._questions.push([question, callback]);
+
+            //if (app.App._instance._ready) {
+            //}
+        },
+
+        answer: function (question, callback) {
+            if (!app.App._instance) throw new Error("app.App: класс должен быть инстанцирован");
+
+            app.App._answers.push([question, callback]);
+
+            //if (app.App._instance._ready) {
+            //}
         }
     }, {
         /* @prototype */
@@ -198,6 +220,20 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
                 $(app.App._whenReadies[0][0]).whenReady(app.App._whenReadies[0][1]);
                 app.App._whenReadies.shift();
             }
+
+            /*var questions = app.App._questions;
+            var answers = app.App._answers;
+            //while (questions.length > 0) {
+            for (var i = 0; i < questions.length; i++) {
+                for (var j = 0; j < answers.length; j++) {
+                    if (questions[i][0] == answers[j][0]) {
+                        answers[j][1](questions[i][1]);
+                        //questions.shift();
+                    }
+                    //$(app.App._whenReadies[0][0]).whenReady(app.App._whenReadies[0][1]);
+                    //app.App._whenReadies.shift();
+                }
+            }*/
         },
 
         _getClassNameByModule: function (moduleName) {
