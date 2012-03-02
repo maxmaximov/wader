@@ -4,7 +4,8 @@
  * Contains various helper methods, store and handle "Controller" modules.
  *
  * @author Andrew Tereshko <andrew.tereshko@gmail.com>
- * @version 0.2.1
+ * @author Max Maximov <max.maximov@gmail.com>
+ * @version 0.2.2
  */
 define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/ADeferredModule"], function(Router, Hub, Logger, IModule, ADeferredModule) {
     "use strict";
@@ -12,44 +13,105 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
     $.Class.extend("app.App", {
         /* @static */
         _instance: null,
+        _timestamp: null,
+        _timeout: 300,
 
-        _whenReadies: [],
+        _interval: null,
+        _intervalDelay: 50,
 
-        _questions: {},
-
+        _selectors: [],
+        _questions: [],
         _answers: {},
 
         getInstance: function (options) {
-            if (!app.App._instance) app.App._instance = new app.App(options);
+            if (!app.App._instance) {
+                app.App._instance = new app.App(options);
+                app.App._timestamp = new Date();
+            }
+
             return app.App._instance;
         },
 
         when: function (selector, callback) {
-            if (!app.App._instance) throw new Error("app.App: класс должен быть инстанцирован");
+            if (!app.App._instance) throw new Error("[app.App] класс должен быть инстанцирован");
 
-            if (app.App._instance._ready) {
-                $(selector).whenReady(callback);
-            } else {
-                app.App._whenReadies.push([selector, callback]);
-            }
+            var callback = arguments.length == 2 ? callback : selector;
+            var selector = arguments.length == 2 ? selector : "";
+
+            app.App._selectors.push({
+                "selector":  selector,
+                "callback": callback
+            });
+
+            app.App._check();
         },
 
         ask: function (question, callback) {
-            if (!app.App._instance) throw new Error("app.App: класс должен быть инстанцирован");
+            if (!app.App._instance) throw new Error("[app.App] класс должен быть инстанцирован");
 
-            app.App._questions.push([question, callback]);
+            app.App._questions.push({
+                "question": question,
+                "callback": callback
+            });
 
-            //if (app.App._instance._ready) {
-            //}
+            app.App._check();
         },
 
-        answer: function (question, callback) {
-            if (!app.App._instance) throw new Error("app.App: класс должен быть инстанцирован");
+        answer: function (question, data) {
+            if (!app.App._instance) throw new Error("[app.App] класс должен быть инстанцирован");
 
-            app.App._answers.push([question, callback]);
+            app.App._answers[question] = data;
 
-            //if (app.App._instance._ready) {
-            //}
+            app.App._check();
+        },
+
+        _check: function () {
+            if (!app.App._interval) {
+                app.App._interval = setInterval(app.App._check, app.App._intervalDelay);
+            } else if ((new Date() - app.App._timestamp) > app.App._timeout) {
+                Logger.warn("[app.App] timeout (" + app.App._timeout + " ms) expired");
+            }
+
+
+            var selectors = app.App._selectors;
+
+            if (app.App._instance._ready) {
+                for (var i = 0; i < selectors.length; i++) {
+                    var callback = selectors[i]["callback"];
+                    var selector = selectors[i]["selector"];
+
+                    if (selector) {
+                        var element = $(selector);
+
+                        if (element.length > 0) {
+                            selectors.splice(i, 1);
+                            callback.apply(element);
+                        }
+                    } else {
+                        selectors.splice(i, 1);
+                        callback();
+                    }
+                }
+            }
+
+
+            var questions = app.App._questions;
+            var answers = app.App._answers;
+
+            for (var i = 0; i < questions.length; i++) {
+                var question = questions[i]["question"];
+                var callback = questions[i]["callback"];
+
+                if (answers[question] !== undefined) {
+                    questions.splice(i, 1);
+                    callback(answers[question]);
+                }
+            }
+
+            if (app.App._interval && selectors.length < 1 && questions.length < 1) {
+                clearInterval(app.App._interval);
+                app.App._interval = null;
+            }
         }
     }, {
         /* @prototype */
@@ -71,7 +133,7 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
         init: function (options) {
             $.extend(this.options, options || {});
 
-            Logger.log(this, "Init");
+            Logger.log(this, "init");
 
             // Binding route rules to modules
             $.each(this.options.routes, function (moduleName, routes) {
@@ -97,7 +159,7 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
         },
 
         run: function () {
-            Logger.log(this, "Run");
+            Logger.log(this, "run");
 
             this._unready();
 
@@ -105,7 +167,7 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
 
             // 404 behavior
             if($.isEmptyObject(matches)) {
-                Logger.log(this, "Request unresolved (" + Router.getCurrentPath() + ")");
+                Logger.log(this, "request unresolved (" + Router.getCurrentPath() + ")");
 
                 this.cleanup();
             }
@@ -126,7 +188,7 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
         },
 
         cleanup: function() {
-            Logger.log(this, "Cleanup");
+            Logger.log(this, "cleanup");
 
             for (moduleName in this._modules) {
                 this._unregisterModule(moduleName);
@@ -149,8 +211,8 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
                     this._modules[className] = module;
 
                     Logger.log(this, className + " module registered");
-                } else if (this.debug) {
-                    Logger.error('[App] Can not create instance of class "' + className + '" requested by path "' + this._getModuleNameByClass(className) + '"');
+                } else {
+                    throw new Error(this, 'can not create instance of class "' + className + '" requested by path "' + this._getModuleNameByClass(className) + '"');
                 }
             }
 
@@ -198,42 +260,17 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
             }
 
             if (size == 0) {
-                this._setReady();
+                Logger.log(this, "ready");
+                this._ready = true;
             }
         },
 
         _unready: function () {
-            Logger.log(this, "Unready");
+            Logger.log(this, "unready");
 
             this._ready = false;
             this._modulesToReady = {};
-            app.App._whenReadies = [];
-            $(window).whenReadyKillall();
-        },
-
-        _setReady: function () {
-            Logger.log(this, "Ready");
-
-            this._ready = true;
-
-            while (app.App._whenReadies.length > 0) {
-                $(app.App._whenReadies[0][0]).whenReady(app.App._whenReadies[0][1]);
-                app.App._whenReadies.shift();
-            }
-
-            /*var questions = app.App._questions;
-            var answers = app.App._answers;
-            //while (questions.length > 0) {
-            for (var i = 0; i < questions.length; i++) {
-                for (var j = 0; j < answers.length; j++) {
-                    if (questions[i][0] == answers[j][0]) {
-                        answers[j][1](questions[i][1]);
-                        //questions.shift();
-                    }
-                    //$(app.App._whenReadies[0][0]).whenReady(app.App._whenReadies[0][1]);
-                    //app.App._whenReadies.shift();
-                }
-            }*/
+            app.App._selectors = [];
         },
 
         _getClassNameByModule: function (moduleName) {

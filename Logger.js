@@ -2,7 +2,7 @@
  * App Logger module
  *
  * @author Max Maximov <max.maximov@gmail.com>
- * @version 0.2.1
+ * @version 0.2.2
  */
 define("app/Logger", ["app/Hub"], function (Hub) {
     "use strict";
@@ -11,19 +11,13 @@ define("app/Logger", ["app/Hub"], function (Hub) {
     /* @static */
     {
         NONE: 0,
-
         ERROR: 1,
-
         WARN: 2,
-
         INFO: 3,
-
         DEBUG: 4,
-
         LOG: 5,
 
         level: 1,
-
         ie: false,
 
         _parseArgs: function () {

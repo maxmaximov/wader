@@ -70,6 +70,13 @@ inital release
 
 * Убрал зависимость от Underscore.js
 
+0.2.2
+-----
+
+* Убита, наконец, зависимость от jQuery.whenReady!
+* Новый механизм App.ask/App.answer
+* Logger.error -> throw new Error() (Logger.error можно позвать из try-catch в, например, main.js)
+
 Строение
 ========
 

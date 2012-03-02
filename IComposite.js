@@ -2,7 +2,7 @@
  * App Composite Interface
  *
  * @author Max Maximov <max.maximov@gmail.com>
- * @version 0.2.1
+ * @version 0.2.2
  */
 define("app/IComposite", ["app/Hub", "app/Logger"], function (Hub, Logger) {
     "use strict";

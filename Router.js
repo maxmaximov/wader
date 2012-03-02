@@ -16,7 +16,7 @@
  * ]
  *
  * @author Andrew Tereshko <andrew.tereshko@gmail.com>
- * @version 0.2.1
+ * @version 0.2.2
  */
 define("app/Router", ["app/Hub", "app/Logger"], function(Hub, Logger) {
     "use strict";

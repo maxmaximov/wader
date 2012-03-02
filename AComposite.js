@@ -2,7 +2,7 @@
  * App Composite Abstract Class
  *
  * @author Max Maximov <max.maximov@gmail.com>
- * @version 0.2.1
+ * @version 0.2.2
  */
 define("app/AComposite", ["app/Hub", "app/Logger", "app/IComposite"], function(Hub, Logger, IComposite) {
     "use strict";
