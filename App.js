@@ -18,6 +18,7 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
 
         _interval: null,
         _intervalDelay: 50,
+        _killInterval: 5000,
 
         _selectors: [],
         _questions: [],
@@ -66,10 +67,12 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
         },
 
         _check: function () {
+            var timestamp = new Date();
+
             if (!app.App._interval) {
                 app.App._interval = setInterval(app.App._check, app.App._intervalDelay);
-            } else if ((new Date() - app.App._timestamp) > app.App._timeout) {
-                Logger.warn("[app.App] timeout (" + app.App._timeout + " ms) expired");
+            } else if (timestamp - app.App._timestamp > app.App._timeout) {
+                Logger.warn("[app.App] timeout (" + app.App._timeout + " ms) expired", app.App._instance._ready, app.App._selectors, app.App._questions);
             }
 
 
@@ -108,7 +111,7 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
                 }
             }
 
-            if (app.App._interval && selectors.length < 1 && questions.length < 1) {
+            if ((app.App._interval && selectors.length < 1 && questions.length < 1) || timestamp - app.App._timestamp > app.App._killInterval) {
                 clearInterval(app.App._interval);
                 app.App._interval = null;
             }
@@ -212,7 +215,7 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
 
                     Logger.log(this, className + " module registered");
                 } else {
-                    throw new Error(this, 'can not create instance of class "' + className + '" requested by path "' + this._getModuleNameByClass(className) + '"');
+                    throw new Error("[app.App] can not create instance of class \"" + className + " requested by path \"" + this._getModuleNameByClass(className) + "\"");
                 }
             }
 
