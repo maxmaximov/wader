@@ -50,12 +50,17 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
         ask: function (question, callback) {
             if (!app.App._instance) throw new Error("[app.App] класс должен быть инстанцирован");
 
+            var deferred = new $.Deferred();
+
             app.App._questions.push({
                 "question": question,
-                "callback": callback
+                "callback": callback,
+                "deferred": deferred
             });
 
             app.App._check();
+
+            return deferred;
         },
 
         answer: function (question, data) {
@@ -104,14 +109,18 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
             for (var i = 0; i < questions.length; i++) {
                 var question = questions[i]["question"];
                 var callback = questions[i]["callback"];
+                var deferred = questions[i]["deferred"];
+                var answer = answers[question];
 
-                if (answers[question] !== undefined) {
+                if (answer !== undefined) {
                     questions.splice(i, 1);
-                    callback(answers[question]);
+                    if (callback !== undefined) callback(answer);
+                    if (deferred !== undefined) deferred.resolve(answer);
                 }
             }
 
-            if ((app.App._interval && selectors.length < 1 && questions.length < 1) || timestamp - app.App._timestamp > app.App._killInterval) {
+            //if ((app.App._interval && selectors.length < 1 && questions.length < 1) || timestamp - app.App._timestamp > app.App._killInterval) {
+            if ((app.App._interval && selectors.length < 1) || timestamp - app.App._timestamp > app.App._killInterval) {
                 clearInterval(app.App._interval);
                 app.App._interval = null;
             }
