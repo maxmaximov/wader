@@ -36,19 +36,35 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
         when: function (selector, callback) {
             if (!app.App._instance) throw new Error("[app.App] класс должен быть инстанцирован");
 
-            var callback = arguments.length == 2 ? callback : selector;
-            var selector = arguments.length == 2 ? selector : "";
+            if (arguments.length = 1) {
+                if (arguments[0] instanceof Function) {
+                    callback = arguments[0];
+                    selector = undefined;
+                } else if (arguments[0] instanceof String) {
+                    callback = arguments[0];
+                    selector = undefined;
+                }
+            }
+
+            if (!(selector || callback)) throw new Error("[app.App] аргументы неок");
+
+            var deferred = new $.Deferred();
 
             app.App._selectors.push({
-                "selector":  selector,
-                "callback": callback
+                "selector": selector,
+                "callback": callback,
+                "deferred": deferred
             });
 
             app.App._check();
+
+            return deferred;
         },
 
         ask: function (question, callback) {
             if (!app.App._instance) throw new Error("[app.App] класс должен быть инстанцирован");
+
+            Logger.info("Ask the question \"" + question + "\"");
 
             var deferred = new $.Deferred();
 
@@ -66,6 +82,7 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
         answer: function (question, data) {
             if (!app.App._instance) throw new Error("[app.App] класс должен быть инстанцирован");
 
+            Logger.info("Answer the question \"" + question + "\"", data);
             app.App._answers[question] = data;
 
             app.App._check();
@@ -87,17 +104,19 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
                 for (var i = 0; i < selectors.length; i++) {
                     var callback = selectors[i]["callback"];
                     var selector = selectors[i]["selector"];
+                    var deferred = selectors[i]["deferred"];
 
                     if (selector) {
                         var element = $(selector);
 
                         if (element.length > 0) {
                             selectors.splice(i, 1);
-                            callback.apply(element);
+                            if (callback !== undefined) callback.apply(element);
+                            if (deferred !== undefined) deferred.resolve(element);
                         }
                     } else {
                         selectors.splice(i, 1);
-                        callback();
+                        if (callback !== undefined) callback();
                     }
                 }
             }
