@@ -93,8 +93,6 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
 
             if (!app.App._interval) {
                 app.App._interval = setInterval(app.App._check, app.App._intervalDelay);
-            } else if (timestamp - app.App._timestamp > app.App._timeout) {
-                Logger.warn("[app.App] timeout (" + app.App._timeout + " ms) expired.", { "ready": app.App._instance._ready, "modules": app.App._instance._modules, "modules to ready": app.App._instance._modulesToReady, "selectors": app.App._selectors, "questions": app.App._questions });
             }
 
 
@@ -138,10 +136,13 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
                 }
             }
 
-            //if ((app.App._interval && selectors.length < 1 && questions.length < 1) || timestamp - app.App._timestamp > app.App._killInterval) {
-            if ((app.App._interval && selectors.length < 1) || timestamp - app.App._timestamp > app.App._killInterval) {
+            if (app.App._interval && selectors.length < 1) {
                 clearInterval(app.App._interval);
                 app.App._interval = null;
+            }
+
+            if (app.App._interval && timestamp - app.App._timestamp > app.App._timeout) {
+                //Logger.warn("[app.App] timeout (" + app.App._timeout + " ms) expired.", { "ready": app.App._instance._ready, "modules": app.App._instance._modules, "modules to ready": app.App._instance._modulesToReady, "selectors": app.App._selectors, "questions": app.App._questions });
             }
         }
     }, {
