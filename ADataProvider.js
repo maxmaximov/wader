@@ -20,6 +20,7 @@ define("app/ADataProvider", [], function () {
     {
         resource: null,
         baseUrl: null,
+        primaryKey: null,
         init: function(resource, baseUrl, primaryKey) {
             this.primaryKey = primaryKey;
             this.resource = resource;
