@@ -28,9 +28,6 @@ define("app/ADataProvider", [], function () {
         },
         get: function (key) {
             var method = "get";
-            if (!key) {
-                throw new Error("Empty key");
-            };
             return this._makeRequest(method, key);
         },
 
