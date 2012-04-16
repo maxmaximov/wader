@@ -7,10 +7,10 @@
  * @author Max Maximov <max.maximov@gmail.com>
  * @version 0.2.2
  */
-define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/ADeferredModule"], function(Router, Hub, Logger, IModule, ADeferredModule) {
+(function(ns) {
     "use strict";
 
-    $.Class.extend("app.App", {
+    $.Class.extend("wader.App", {
         /* @static */
         _instance: null,
         _timestamp: null,
@@ -25,16 +25,16 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
         _answers: {},
 
         getInstance: function (options) {
-            if (!app.App._instance) {
-                app.App._instance = new app.App(options);
-                app.App._timestamp = new Date();
+            if (!wader.App._instance) {
+                wader.App._instance = new wader.App(options);
+                wader.App._timestamp = new Date();
             }
 
-            return app.App._instance;
+            return wader.App._instance;
         },
 
         when: function (selector, callback) {
-            if (!app.App._instance) throw new Error("[app.App] класс должен быть инстанцирован");
+            if (!wader.App._instance) throw new Error("[wader.App] класс должен быть инстанцирован");
 
             if (arguments.length = 1) {
                 if (arguments[0] instanceof Function) {
@@ -46,59 +46,59 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
                 }
             }
 
-            if (!(selector || callback)) throw new Error("[app.App] аргументы неок");
+            if (!(selector || callback)) throw new Error("[wader.App] аргументы неок");
 
             var deferred = new $.Deferred();
 
-            app.App._selectors.push({
+            wader.App._selectors.push({
                 "selector": selector,
                 "callback": callback,
                 "deferred": deferred
             });
 
-            app.App._check();
+            wader.App._check();
 
             return deferred;
         },
 
         ask: function (question, callback) {
-            if (!app.App._instance) throw new Error("[app.App] класс должен быть инстанцирован");
+            if (!wader.App._instance) throw new Error("[wader.App] класс должен быть инстанцирован");
 
             Logger.info("Ask the question \"" + question + "\"");
 
             var deferred = new $.Deferred();
 
-            app.App._questions.push({
+            wader.App._questions.push({
                 "question": question,
                 "callback": callback,
                 "deferred": deferred
             });
 
-            app.App._check();
+            wader.App._check();
 
             return deferred;
         },
 
         answer: function (question, data) {
-            if (!app.App._instance) throw new Error("[app.App] класс должен быть инстанцирован");
+            if (!wader.App._instance) throw new Error("[wader.App] класс должен быть инстанцирован");
 
             Logger.info("Answer the question \"" + question + "\"", data);
-            app.App._answers[question] = data;
+            wader.App._answers[question] = data;
 
-            app.App._check();
+            wader.App._check();
         },
 
         _check: function () {
             var timestamp = new Date();
 
-            if (!app.App._interval) {
-                app.App._interval = setInterval(app.App._check, app.App._intervalDelay);
+            if (!wader.App._interval) {
+                wader.App._interval = setInterval(wader.App._check, wader.App._intervalDelay);
             }
 
 
-            var selectors = app.App._selectors;
+            var selectors = wader.App._selectors;
 
-            if (app.App._instance._ready) {
+            if (wader.App._instance._ready) {
                 for (var i = 0; i < selectors.length; i++) {
                     var callback = selectors[i]["callback"];
                     var selector = selectors[i]["selector"];
@@ -120,8 +120,8 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
             }
 
 
-            var questions = app.App._questions;
-            var answers = app.App._answers;
+            var questions = wader.App._questions;
+            var answers = wader.App._answers;
 
             for (var i = 0; i < questions.length; i++) {
                 var question = questions[i]["question"];
@@ -136,20 +136,19 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
                 }
             }
 
-            if (app.App._interval && selectors.length < 1) {
-                clearInterval(app.App._interval);
-                app.App._interval = null;
+            if (wader.App._interval && selectors.length < 1) {
+                clearInterval(wader.App._interval);
+                wader.App._interval = null;
             }
 
-            if (app.App._interval && timestamp - app.App._timestamp > app.App._timeout) {
-                //Logger.warn("[app.App] timeout (" + app.App._timeout + " ms) expired.", { "ready": app.App._instance._ready, "modules": app.App._instance._modules, "modules to ready": app.App._instance._modulesToReady, "selectors": app.App._selectors, "questions": app.App._questions });
+            if (wader.App._interval && timestamp - wader.App._timestamp > wader.App._timeout) {
+                //Logger.warn("[wader.App] timeout (" + wader.App._timeout + " ms) expired.", { "ready": wader.App._instance._ready, "modules": wader.App._instance._modules, "modules to ready": wader.App._instance._modulesToReady, "selectors": wader.App._selectors, "questions": wader.App._questions });
             }
         }
     }, {
         /* @prototype */
         options: {
-            routes: {},
-            baseNamespace: "App"
+            routes: {}
         },
 
         /**
@@ -184,10 +183,10 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
                 }
             } else {
                 // App run on every hash change
-                $(window).bind("statechange.app", this.proxy("run"));
+                $(window).bind("statechange.wader", this.proxy("run"));
             }
 
-            Hub.sub("app/module/ready", this.proxy("_onReadyModule"));
+            Hub.sub("wader/module/ready", this.proxy("_onReadyModule"));
         },
 
         run: function () {
@@ -244,7 +243,7 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
 
                     Logger.log(this, className + " module registered");
                 } else {
-                    throw new Error("[app.App] can not create instance of class \"" + className + " requested by path \"" + this._getModuleNameByClass(className) + "\"");
+                    throw new Error("[wader.App] can not create instance of class \"" + className + " requested by path \"" + this._getModuleNameByClass(className) + "\"");
                 }
             }
 
@@ -302,15 +301,11 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
 
             this._ready = false;
             this._modulesToReady = {};
-            app.App._selectors = [];
+            wader.App._selectors = [];
         },
 
         _getClassNameByModule: function (moduleName) {
             var nameChunks = moduleName.split("/"), nameChunkCount = nameChunks.length;
-
-            if (this.options.baseNamespace) {
-                nameChunkCount = nameChunks.unshift(this.options.baseNamespace);
-            }
 
             while (nameChunkCount--) {
                 nameChunks[nameChunkCount] = nameChunks[nameChunkCount].charAt(0).toUpperCase() + nameChunks[nameChunkCount].slice(1);
@@ -320,10 +315,6 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
         },
 
         _getModuleNameByClass: function (className) {
-            if (this.options.baseNamespace) {
-                className = className.replace( this.options.baseNamespace + ".", "" );
-            }
-
             var nameChunks = className.split( "." ), nameChunkCount = nameChunks.length;
 
             //while (nameChunkCount--) {
@@ -334,6 +325,5 @@ define("app/App", ["app/Router", "app/Hub", "app/Logger", "app/IModule", "app/AD
         }
     });
 
-    return app.App;
-});
-
+    if (ns !== wader) ns.App = wader.App;
+})(window.WADER_NS || window);

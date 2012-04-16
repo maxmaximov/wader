@@ -1,7 +1,7 @@
-define("app/RESTDataProvider", [], function() {
+(function(ns) {
     "use strict";
 
-    ADataProvider.extend("app.RESTDataProvider", {
+    ADataProvider.extend("wader.RESTDataProvider", {
         _makeRequest: function(method, extraParams) {
             var url = this.baseUrl + this.resource + "/",
                 data = {};
@@ -50,6 +50,5 @@ define("app/RESTDataProvider", [], function() {
         }
     });
 
-    return app.RESTDataProvider;
-});
-
+    if (ns !== wader) ns.RESTDataProvider = wader.RESTDataProvider;
+})(window.WADER_NS || window);

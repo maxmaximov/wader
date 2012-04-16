@@ -4,10 +4,10 @@
  * @author Max Maximov <max.maximov@gmail.com>
  * @version 0.2.2
  */
-define("app/Hub", ["app/Logger"], function (Logger) {
+(function(ns) {
     "use strict";
 
-    $.Class.extend("app.Hub",
+    $.Class.extend("wader.Hub",
     /* @static */
     {
         _domNode: $("<i/>"),
@@ -31,20 +31,19 @@ define("app/Hub", ["app/Logger"], function (Logger) {
 
             wrapper.guid = callback.guid = callback.guid || ($.guid ? $.guid++ : $.event.guid++);
 
-            this._domNode.bind(channel + ".app", wrapper);
+            this._domNode.bind(channel + ".wader", wrapper);
         },
 
         unsub: function (channel, callback) {
             Logger.info("Unsubscribed from channel \"" + channel + "\"");
             //Logger.info(this, "unsubscribed from channel \"" + channel + "\"");
 
-            this._domNode.unbind(channel + ".app", callback);
+            this._domNode.unbind(channel + ".wader", callback);
         }
     },
     /* @prototype */
     {
     });
 
-    return app.Hub;
-});
-
+    if (ns !== wader) ns.Hub = wader.Hub;
+})(window.WADER_NS || window);

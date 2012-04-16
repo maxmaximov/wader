@@ -1,7 +1,7 @@
-define("app/TestRESTDataProvider", [], function() {
+(function(ns) {
     "use strict";
 
-    ADataProvider.extend("app.TestRESTDataProvider", {
+    ADataProvider.extend("wader.TestRESTDataProvider", {
         _handleResult: function(url, data, method) {
             return {
                 url: url,
@@ -11,6 +11,5 @@ define("app/TestRESTDataProvider", [], function() {
         }
     });
 
-    return app.TestRESTDataProvider;
-});
-
+    if (ns !== wader) ns.TestRESTDataProvider = wader.TestRESTDataProvider;
+})(window.WADER_NS || window);

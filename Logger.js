@@ -4,10 +4,10 @@
  * @author Max Maximov <max.maximov@gmail.com>
  * @version 0.2.2
  */
-define("app/Logger", ["app/Hub"], function (Hub) {
+(function(ns) {
     "use strict";
 
-    $.Class.extend("app.Logger",
+    $.Class.extend("wader.Logger",
     /* @static */
     {
         NONE: 0,
@@ -28,12 +28,12 @@ define("app/Logger", ["app/Hub"], function (Hub) {
         },
 
         _echo: function (args, type) {
-            var args = app.Logger._parseArgs(args);
+            var args = wader.Logger._parseArgs(args);
 
-            /*@cc_on app.Logger.ie = true; @*/
+            /*@cc_on wader.Logger.ie = true; @*/
 
-            if (app.Logger.debug && window.console && window.console[type]) {
-                if (app.Logger.ie) {
+            if (wader.Logger.debug && window.console && window.console[type]) {
+                if (wader.Logger.ie) {
                     console[type](args.join(" "));
                 } else {
                     console[type].apply(console, args);
@@ -42,29 +42,28 @@ define("app/Logger", ["app/Hub"], function (Hub) {
         },
 
         log: function () {
-            if (app.Logger.level >= app.Logger.LOG) app.Logger._echo(arguments, "log");
+            if (wader.Logger.level >= wader.Logger.LOG) wader.Logger._echo(arguments, "log");
         },
 
         debug: function () {
-            if (app.Logger.level >= app.Logger.DEBUG) app.Logger._echo(arguments, "debug");
+            if (wader.Logger.level >= wader.Logger.DEBUG) wader.Logger._echo(arguments, "debug");
         },
 
         info: function () {
-            if (app.Logger.level >= app.Logger.INFO) app.Logger._echo(arguments, "info");
+            if (wader.Logger.level >= wader.Logger.INFO) wader.Logger._echo(arguments, "info");
         },
 
         warn: function () {
-            if (app.Logger.level >= app.Logger.WARN) app.Logger._echo(arguments, "warn");
+            if (wader.Logger.level >= wader.Logger.WARN) wader.Logger._echo(arguments, "warn");
         },
 
         error: function () {
-            if (app.Logger.level >= app.Logger.ERROR) app.Logger._echo(arguments, "error");
+            if (wader.Logger.level >= wader.Logger.ERROR) wader.Logger._echo(arguments, "error");
         }
     },
     /* @prototype */
     {
     });
 
-    return app.Logger;
-});
-
+    if (ns !== wader) ns.Logger = wader.Logger;
+})(window.WADER_NS || window);

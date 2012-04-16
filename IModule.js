@@ -4,10 +4,10 @@
  * @author Max Maximov <max.maximov@gmail.com>
  * @version 0.2.2
  */
-define("app/IModule", ["app/Hub", "app/Logger"], function(Hub, Logger) {
+(function(ns) {
     "use strict";
 
-    $.Class.extend("app.IModule", {
+    $.Class.extend("wader.IModule", {
         init: function() {
             throw new Error(this.constructor.fullName + ": не реализован метод init");
         },
@@ -19,6 +19,5 @@ define("app/IModule", ["app/Hub", "app/Logger"], function(Hub, Logger) {
         }
     });
 
-    return app.IModule;
-});
-
+    if (ns !== wader) ns.IModule = wader.IModule;
+})(window.WADER_NS || window);

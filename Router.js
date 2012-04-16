@@ -18,12 +18,11 @@
  * @author Andrew Tereshko <andrew.tereshko@gmail.com>
  * @version 0.2.2
  */
-define("app/Router", ["app/Hub", "app/Logger"], function(Hub, Logger) {
+(function(ns) {
     "use strict";
 
-    $.Class.extend("app.Route",
+    $.Class.extend("wader.Router", {
     /* @static */
-    {
         _rules: [],
 
         add: function( rule, name )
@@ -154,6 +153,5 @@ define("app/Router", ["app/Hub", "app/Logger"], function(Hub, Logger) {
         }
     });
 
-    return app.Route;
-});
-
+    if (ns !== wader) ns.Router = wader.Router;
+})(window.WADER_NS || window);

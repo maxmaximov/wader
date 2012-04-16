@@ -4,12 +4,11 @@
  * @author Max Maximov <max.maximov@gmail.com>
  * @version 0.2.2
  */
-define("app/ADeferredModule", ["app/Hub", "app/Logger", "app/IModule"], function(Hub, Logger, IModule) {
+(function(ns) {
     "use strict";
 
-    IModule.extend("app.ADeferredModule", {
+    wader.IModule.extend("wader.ADeferredModule", {
     });
 
-    return app.ADeferredModule;
-});
-
+    if (ns !== wader) ns.ADeferredModule = wader.ADeferredModule;
+})(window.WADER_NS || window);

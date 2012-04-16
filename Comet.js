@@ -4,23 +4,23 @@
  * @author Max Maximov <max.maximov@gmail.com>
  * @version 0.2.2
  */
-define("app/Comet", ["app/Hub", "app/Logger"], function(Hub, Logger) {
+(function(ns) {
     "use strict";
 
-    $.Class.extend("app.Comet",
+    $.Class.extend("wader.Comet",
     /* @static */
     {
         _instance: null,
 
         getInstance: function (url) {
-            if (!app.Comet._instance) app.Comet._instance = new app.Comet(url);
-            return app.Comet._instance;
+            if (!wader.Comet._instance) wader.Comet._instance = new wader.Comet(url);
+            return wader.Comet._instance;
         },
 
         send: function (channel, data) {
-            if (!app.Comet._instance) throw new Error("app.Comet: класс должен быть инстанцирован");
+            if (!wader.Comet._instance) throw new Error("wader.Comet: класс должен быть инстанцирован");
 
-            app.Comet.getInstance().send(channel, data);
+            wader.Comet.getInstance().send(channel, data);
         }
     },
     /* @prototype */
@@ -78,6 +78,5 @@ define("app/Comet", ["app/Hub", "app/Logger"], function(Hub, Logger) {
         }
     });
 
-    return app.Comet;
-});
-
+    if (ns !== wader) ns.Comet = wader.Comet;
+})(window.WADER_NS || window);

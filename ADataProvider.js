@@ -4,13 +4,13 @@
  * @author sc0rp10 <dev@weblab.pro>
  * @version 0.0.2
  */
-define("app/ADataProvider", [], function () {
+(function(ns) {
     "use strict";
 
     /*
-    * @abstract app.ADataProvider
+    * @abstract wader.ADataProvider
     */
-    $.Class.extend("app.ADataProvider",
+    $.Class.extend("wader.ADataProvider",
 
     /* @Static */
     {
@@ -102,5 +102,5 @@ define("app/ADataProvider", [], function () {
         }
     });
 
-    return app.ADataProvider;
-});
+    if (ns !== wader) ns.ADataProvider = wader.ADataProvider;
+})(window.WADER_NS || window);
