@@ -14,6 +14,12 @@
 
     /* @Static */
     {
+        NULL: 0,
+        CREATED: 1,
+        EXIST: 2,
+        UPDATED: 3,
+        DELETED: 4,
+
         generateId: function () {
             if (!wader.AModel.count) wader.AModel.count = 0;
             return wader.AModel.count++;
@@ -33,31 +39,31 @@
         },
 
         create: function () {
-            this.setState("null");
+            this.setState(wader.AModel.NULL);
             this._collection.add(this);
         },
 
         add: function (data) {
             this.parse(data);
-            this.setState("created");
+            this.setState(wader.AModel.CREATED);
             this._collection.refresh();
         },
 
         load: function (data) {
             this.parse(data);
-            this.setState("exist");
+            this.setState(wader.AModel.EXIST);
         },
 
         edit: function (data) {
             this.parse(data);
-            this.setState("updated");
+            this.setState(wader.AModel.UPDATED);
             this._collection.refresh();
         },
 
         save: function () {
             var promise = new $.Deferred();
 
-            if (this.getState() == "created") {
+            if (this.getState() == wader.AModel.CREATED) {
                 $.when(this._dp.set(this.toJson())).done(this.proxy("_onSave", promise)).fail(this.proxy("_onSaveError", promise));
             } else {
                 $.when(this._dp.update(this.toJson())).done(this.proxy("_onSave", promise)).fail(this.proxy("_onSaveError", promise));
@@ -67,7 +73,7 @@
         },
 
         remove: function (silent) {
-            this.setState("deleted");
+            this.setState(wader.AModel.DELETED);
             this._collection.remove(this);
             if (!silent) this._collection.refresh();
 
@@ -83,13 +89,13 @@
         },
 
         _onSave: function (promise, response) {
-            this.setState("exist");
+            this.setState(wader.AModel.EXIST);
 
             promise.resolve(response);
         },
 
         _onRemove: function (promise, response) {
-            this.setState("null");
+            this.setState(wader.AModel.NULL);
 
             promise.resolve(response);
         },
