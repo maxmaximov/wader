@@ -32,14 +32,13 @@
             this._promises.push(promise);
         },
 
-        // TODO: переименовать в prepare()
-        get: function () {
+        prepare: function () {
             if (!this._promise) {
                 this._promise = new $.Deferred();
                 if (this._prepared) {
                     this._promise.resolve(this._items);
                 } else {
-                    $.when.apply($, this._promises).done(this.proxy("_get"));
+                    $.when.apply($, this._promises).done(this.proxy("_prepare"));
                 }
             }
 
