@@ -5,7 +5,7 @@
  *
  * @author Andrew Tereshko <andrew.tereshko@gmail.com>
  * @author Max Maximov <max.maximov@gmail.com>
- * @version 0.2.2
+ * @version 0.3
  */
 (function(ns) {
     "use strict";

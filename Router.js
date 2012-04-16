@@ -1,14 +1,14 @@
 /**
- * App Router module
+ * Wader Router module
  *
  * Simple url routing system
  *
  * @example
  *
- *  App.Route.add( /^sad\/?([0-9]+)?$/g, 'regular' )
- *  App.Route.add( 'sad/2', 'happy' );
+ *  Wader.Route.add( /^sad\/?([0-9]+)?$/g, 'regular' )
+ *  Wader.Route.add( 'sad/2', 'happy' );
  *
- *  var res = App.Route.match( 'sad/2' );
+ *  var res = Wader.Route.match( 'sad/2' );
  *
  *  res = [
  *      happy:[],
@@ -16,7 +16,7 @@
  * ]
  *
  * @author Andrew Tereshko <andrew.tereshko@gmail.com>
- * @version 0.2.2
+ * @version 0.3
  */
 (function(ns) {
     "use strict";

@@ -1,12 +1,15 @@
 /**
- * App Deferred Module Abstract Class
+ * Wader Abstract Deferred Module
  *
  * @author Max Maximov <max.maximov@gmail.com>
- * @version 0.2.2
+ * @version 0.3
  */
 (function(ns) {
     "use strict";
 
+    /*
+    * @abstract wader.AModel
+    */
     wader.IModule.extend("wader.ADeferredModule", {
     });
 

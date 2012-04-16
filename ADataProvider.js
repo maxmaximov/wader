@@ -1,8 +1,8 @@
 /**
- * App DataProvider Abstract
+ * Wader Abstract DataProvider
  *
  * @author sc0rp10 <dev@weblab.pro>
- * @version 0.0.2
+ * @version 0.3
  */
 (function(ns) {
     "use strict";

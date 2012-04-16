@@ -1,8 +1,8 @@
 /**
- * App Logger module
+ * Wader Logger module
  *
  * @author Max Maximov <max.maximov@gmail.com>
- * @version 0.2.2
+ * @version 0.3
  */
 (function(ns) {
     "use strict";
