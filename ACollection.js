@@ -18,14 +18,15 @@
 
     /* @Prototype */
     {
-        setup: function () {
+        setup: function (dependencies) {
+            this._dependencies = dependencies;
+
             this._prepared = false;
             this._items = [];
             this._promises = [];
             this._observers = [];
-            this._models = null;
-            this._promise = null;
-            this._dp = null;
+            this._promise;
+            this._dp;
         },
 
         _addPromise: function (promise) {
@@ -122,7 +123,7 @@
         remove: function (item) {
             for (var i in this._items) {
                 if (this._items[i] && this._items[i] == item) {
-                    this._items[i] = null;
+                    this._items[i] = undefined;
                     return;
                 }
             }
