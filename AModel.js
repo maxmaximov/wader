@@ -28,19 +28,21 @@
 
     /* @Prototype */
     {
-        setup: function () {
+        setup: function (collection, dependencies) {
             this._id = this.constructor.generateId();
 
-            this._state = null;
-            this._collection = null;
-            this._dependencies = [];
-            this._dp = null;
-            this._disabled = false;
-        },
+            this._collection = collection;
+            this._dependencies = dependencies;
 
-        _create: function () {
+            this._disabled = false;
+
             this.setState(wader.AModel.NULL);
-            this._collection.add(this);
+
+            this._dp;
+            if (this._collection) {
+                this._dp = this._collection._getDp();
+                this._collection.add(this);
+            }
         },
 
         add: function (data) {
