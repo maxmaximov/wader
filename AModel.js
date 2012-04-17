@@ -38,33 +38,76 @@
             this._disabled = false;
         },
 
-        create: function () {
+        _create: function () {
             this.setState(wader.AModel.NULL);
             this._collection.add(this);
         },
 
         add: function (data) {
+            if (this.getState() !== wader.AModel.NULL) {
+                Logger.warn(this, "Model are already added");
+            }
+
             this.parse(data);
             this.setState(wader.AModel.CREATED);
+
             this._collection.refresh();
         },
 
         load: function (data) {
+            if (this.getState() === wader.AModel.CREATED) {
+                throw new Error("Model are CREATED");
+            }
+
             this.parse(data);
             this.setState(wader.AModel.EXIST);
         },
 
         edit: function (data) {
+            if (this.getState() === wader.AModel.NULL) {
+                throw new Error("Model are NULL");
+            } else if (this.getState() === wader.AModel.DELETED) {
+                throw new Error("Model are DELETED");
+            }
+
             this.parse(data);
-            this.setState(wader.AModel.UPDATED);
+            if (this.getState() === wader.AModel.EXIST) {
+                this.setState(wader.AModel.UPDATED);
+            }
+
             this._collection.refresh();
         },
 
+        remove: function (silent) {
+            if (this.getState() === wader.AModel.NULL) {
+                throw new Error("Model are NULL");
+            } else if (this.getState() === wader.AModel.DELETED) {
+                throw new Error("Model are already DELETED");
+            }
+
+            if (this.getState() === wader.AModel.CREATED) {
+                this.setState(wader.AModel.NULL);
+            } else {
+                this.setState(wader.AModel.DELETED);
+            }
+
+            this._collection.remove(this);
+            if (!silent) this._collection.refresh();
+        },
+
         save: function () {
+            if (this.getState() === wader.AModel.NULL) {
+                throw new Error("Model are NULL");
+            } else if (this.getState() === wader.AModel.EXIST) {
+                throw new Error("Model are EXIST");
+            }
+
             var promise = new $.Deferred();
 
-            if (this.getState() == wader.AModel.CREATED) {
+            if (this.getState() === wader.AModel.CREATED) {
                 $.when(this._dp.set(this.toJson())).done(this.proxy("_onSave", promise)).fail(this.proxy("_onSaveError", promise));
+            } else if (this.getState() === wader.AModel.DELETED) {
+                $.when(this._dp.delete(this.toJson())).done(this.proxy("_onSave", promise)).fail(this.proxy("_onSaveError", promise));
             } else {
                 $.when(this._dp.update(this.toJson())).done(this.proxy("_onSave", promise)).fail(this.proxy("_onSaveError", promise));
             }
@@ -72,39 +115,17 @@
             return promise;
         },
 
-        remove: function (silent) {
-            this.setState(wader.AModel.DELETED);
-            this._collection.remove(this);
-            if (!silent) this._collection.refresh();
-
-            var promise = new $.Deferred();
-
-            if (silent) {
-                this._onRemove(promise);
-            } else {
-                $.when(this._dp.delete(this.toJson())).done(this.proxy("_onRemove", promise)).fail(this.proxy("_onRemoveError", promise));
-            }
-
-            return promise;
-        },
-
         _onSave: function (promise, response) {
-            this.setState(wader.AModel.EXIST);
-
-            promise.resolve(response);
-        },
-
-        _onRemove: function (promise, response) {
-            this.setState(wader.AModel.NULL);
+            if (this.getState() === wader.AModel.DELETED) {
+                this.setState(wader.AModel.NULL);
+            } else {
+                this.setState(wader.AModel.EXIST);
+            }
 
             promise.resolve(response);
         },
 
         _onSaveError: function (promise, response) {
-            promise.reject(response);
-        },
-
-        _onRemoveError: function (promise, response) {
             promise.reject(response);
         },
 
