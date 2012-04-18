@@ -50,13 +50,11 @@
                 throw new Error(this, "Model are already added");
             }
 
-            var invalid = this._validate(data);
+            var invalid = this._parse(data);
             if (invalid) {
                 return invalid;
             } else {
-                this.parse(data);
                 this.setState(wader.AModel.CREATED);
-
                 this._collection.refresh();
             }
         },
@@ -66,11 +64,10 @@
                 throw new Error("Model are CREATED");
             }
 
-            var invalid = this._validate(data);
+            var invalid = this._parse(data);
             if (invalid) {
                 return invalid;
             } else {
-                this.parse(data);
                 this.setState(wader.AModel.EXIST);
             }
         },
@@ -82,11 +79,10 @@
                 throw new Error("Model are DELETED");
             }
 
-            var invalid = this._validate(data);
+            var invalid = this._parse(data);
             if (invalid) {
                 return invalid;
             } else {
-                this.parse(data);
                 if (this.getState() === wader.AModel.EXIST) {
                     this.setState(wader.AModel.UPDATED);
                 }
@@ -173,6 +169,11 @@
         },
 
         _validate: function () {
+            return;
+        },
+
+        _parse: function () {
+            return this._validate();
         }
     });
 
