@@ -47,13 +47,18 @@
 
         add: function (data) {
             if (this.getState() !== wader.AModel.NULL) {
-                Logger.warn(this, "Model are already added");
+                throw new Error(this, "Model are already added");
             }
 
-            this.parse(data);
-            this.setState(wader.AModel.CREATED);
+            var invalid = this._validate(data);
+            if (invalid) {
+                return invalid;
+            } else {
+                this.parse(data);
+                this.setState(wader.AModel.CREATED);
 
-            this._collection.refresh();
+                this._collection.refresh();
+            }
         },
 
         load: function (data) {
@@ -61,8 +66,13 @@
                 throw new Error("Model are CREATED");
             }
 
-            this.parse(data);
-            this.setState(wader.AModel.EXIST);
+            var invalid = this._validate(data);
+            if (invalid) {
+                return invalid;
+            } else {
+                this.parse(data);
+                this.setState(wader.AModel.EXIST);
+            }
         },
 
         edit: function (data) {
@@ -72,12 +82,17 @@
                 throw new Error("Model are DELETED");
             }
 
-            this.parse(data);
-            if (this.getState() === wader.AModel.EXIST) {
-                this.setState(wader.AModel.UPDATED);
-            }
+            var invalid = this._validate(data);
+            if (invalid) {
+                return invalid;
+            } else {
+                this.parse(data);
+                if (this.getState() === wader.AModel.EXIST) {
+                    this.setState(wader.AModel.UPDATED);
+                }
 
-            this._collection.refresh();
+                this._collection.refresh();
+            }
         },
 
         remove: function (silent) {
@@ -155,6 +170,9 @@
 
         getId: function () {
             return this._id;
+        },
+
+        _validate: function () {
         }
     });
 
