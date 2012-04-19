@@ -120,7 +120,7 @@
             if (this.getState() === wader.AModel.CREATED) {
                 $.when(this._dp.set(this.toJson())).done(this.proxy("_onSave", promise)).fail(this.proxy("_onSaveError", promise));
             } else if (this.getState() === wader.AModel.DELETED) {
-                $.when(this._dp.delete(this.toJson())).done(this.proxy("_onSave", promise)).fail(this.proxy("_onSaveError", promise));
+                $.when(this._dp.remove(this.toJson())).done(this.proxy("_onSave", promise)).fail(this.proxy("_onSaveError", promise));
             } else {
                 $.when(this._dp.update(this.toJson())).done(this.proxy("_onSave", promise)).fail(this.proxy("_onSaveError", promise));
             }

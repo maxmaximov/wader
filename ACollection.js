@@ -55,7 +55,7 @@
         },
 
         getById: function (id) {
-            for (var i in this._items) {
+            for (var i = 0, l = this._items.length; i < l; i++) {
                 if (this._items[i] && this._items[i].getId() == id) {
                     return this._items[i];
                 }
@@ -65,7 +65,7 @@
         getAll: function () {
             var items = [];
 
-            for (var i in this._items) {
+            for (var i = 0, l = this._items.length; i < l; i++) {
                 if (this._items[i] && !this._items[i].isDisabled() && this._items[i].getState() != wader.AModel.DELETED && this._items[i].getState() != wader.AModel.NULL) {
                     items.push(this._items[i]);
                 }
@@ -77,7 +77,7 @@
         getAllWithDisabled: function () {
             var items = [];
 
-            for (var i in this._items) {
+            for (var i = 0, l = this._items.length; i < l; i++) {
                 if (this._items[i] && this._items[i].getState() != wader.AModel.DELETED && this._items[i].getState() != wader.AModel.NULL) {
                     items.push(this._items[i]);
                 }
@@ -89,7 +89,7 @@
         toJson: function () {
             var items = [];
 
-            for (var i in this._items) {
+            for (var i = 0, l = this._items.length; i < l; i++) {
                 if (this._items[i] && this._items[i].getState() != wader.AModel.DELETED && this._items[i].getState() != wader.AModel.NULL) {
                     items[i] = this._items[i].toJson();
                 }
@@ -103,7 +103,7 @@
         },
 
         removeObserver: function (callback) {
-            for (var i in this._observers) {
+            for (var i = 0, l = this._observers.length; i < l; i++) {
                 if (this._observers[i] == callback) {
                     this._observers = this._observers.slice(i, 1);
                 }
@@ -111,7 +111,7 @@
         },
 
         _notifyObservers: function () {
-            for (var i in this._observers) {
+            for (var i = 0, l = this._observers.length; i < l; i++) {
                 this._observers[i]();
             }
         },
@@ -121,7 +121,7 @@
         },
 
         remove: function (item) {
-            for (var i in this._items) {
+            for (var i = 0, l = this._items.length; i < l; i++) {
                 if (this._items[i] && this._items[i] == item) {
                     this._items[i] = undefined;
                     return;

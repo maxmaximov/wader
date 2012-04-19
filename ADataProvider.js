@@ -41,7 +41,7 @@
             return this._makeRequest(method, object);
         },
 
-        delete: function () {
+        remove: function () {
             var method = "delete";
             return this._makeRequest(method, object);
         },
