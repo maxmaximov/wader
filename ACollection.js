@@ -56,7 +56,7 @@
 
         getById: function (id) {
             for (var i = 0, l = this._items.length; i < l; i++) {
-                if (this._items[i] && this._items[i].getId() == id) {
+                if (this._items[i] && this._items[i].getId() === id) {
                     return this._items[i];
                 }
             }
@@ -104,7 +104,7 @@
 
         removeObserver: function (callback) {
             for (var i = 0, l = this._observers.length; i < l; i++) {
-                if (this._observers[i] == callback) {
+                if (this._observers[i] === callback) {
                     this._observers = this._observers.slice(i, 1);
                 }
             }
@@ -122,7 +122,7 @@
 
         remove: function (item) {
             for (var i = 0, l = this._items.length; i < l; i++) {
-                if (this._items[i] && this._items[i] == item) {
+                if (this._items[i] && this._items[i] === item) {
                     this._items[i] = undefined;
                     return;
                 }
