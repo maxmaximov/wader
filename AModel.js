@@ -30,6 +30,7 @@
     {
         setup: function (collection, dependencies) {
             this._id = this.constructor.generateId();
+            this._attribute = {};
 
             this._collection = collection;
             this._dependencies = dependencies;
@@ -43,6 +44,41 @@
                 this._dp = this._collection._getDp();
                 this._collection.add(this);
             }
+        },
+
+        _get: function (name) {
+            if (this.getState() === wader.AModel.NULL) {
+                console.log(this, this.constructor.fullName);
+                throw new Error("Model are NULL");
+            } else if (this.getState() === wader.AModel.DELETED) {
+                throw new Error("Model are DELETED");
+            }
+
+            if (!name in this._attribute) {
+                throw new Error("Не знаю ничего про свойство " + name + " атрибута модели " + this.constructor.fullName);
+            }
+
+            return this._attribute[name];
+        },
+
+        _set: function (name, value) {
+            if (this.getState() === wader.AModel.NULL) {
+                throw new Error("Model are NULL");
+            } else if (this.getState() === wader.AModel.DELETED) {
+                throw new Error("Model are DELETED");
+            }
+
+            if (!name in this._attribute) {
+                throw new Error("Не знаю ничего про свойство " + name + " атрибута модели " + this.constructor.fullName);
+            }
+
+            this._attribute["name"] = value;
+
+            if (this.getState() === wader.AModel.EXIST) {
+                this.setState(wader.AModel.UPDATED);
+            }
+
+            this._collection.refresh();
         },
 
         add: function (data) {

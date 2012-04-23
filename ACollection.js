@@ -56,7 +56,7 @@
 
         getById: function (id) {
             for (var i = 0, l = this._items.length; i < l; i++) {
-                if (this._items[i] && this._items[i].getId() === id) {
+                if (this._items[i] && this._items[i].getId() == id) {
                     return this._items[i];
                 }
             }
@@ -66,7 +66,7 @@
             var items = [];
 
             for (var i = 0, l = this._items.length; i < l; i++) {
-                if (this._items[i] && !this._items[i].isDisabled() && this._items[i].getState() != wader.AModel.DELETED && this._items[i].getState() != wader.AModel.NULL) {
+                if (this._items[i] && this._items[i].getState() !== wader.AModel.DELETED && this._items[i].getState() !== wader.AModel.NULL && !this._items[i].isDisabled()) {
                     items.push(this._items[i]);
                 }
             }
@@ -78,7 +78,7 @@
             var items = [];
 
             for (var i = 0, l = this._items.length; i < l; i++) {
-                if (this._items[i] && this._items[i].getState() != wader.AModel.DELETED && this._items[i].getState() != wader.AModel.NULL) {
+                if (this._items[i] && this._items[i].getState() !== wader.AModel.DELETED && this._items[i].getState() !== wader.AModel.NULL) {
                     items.push(this._items[i]);
                 }
             }
@@ -90,7 +90,7 @@
             var items = [];
 
             for (var i = 0, l = this._items.length; i < l; i++) {
-                if (this._items[i] && this._items[i].getState() != wader.AModel.DELETED && this._items[i].getState() != wader.AModel.NULL) {
+                if (this._items[i] && this._items[i].getState() !== wader.AModel.DELETED && this._items[i].getState() !== wader.AModel.NULL) {
                     items[i] = this._items[i].toJson();
                 }
             }
