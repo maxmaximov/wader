@@ -150,7 +150,8 @@
             if (this.getState() === wader.AModel.NULL) {
                 throw new Error("Model are NULL");
             } else if (this.getState() === wader.AModel.EXIST) {
-                throw new Error("Model are EXIST");
+                Logger.warn("Model are EXIST");
+                return true;
             }
 
             var promise = new $.Deferred();
