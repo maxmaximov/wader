@@ -72,13 +72,15 @@
                 throw new Error("Не знаю ничего про свойство " + name + " атрибута модели " + this.constructor.fullName);
             }
 
-            this._attribute["name"] = value;
-
-            if (this.getState() === wader.AModel.EXIST) {
-                this.setState(wader.AModel.UPDATED);
-            }
+            if (this._attribute[name] != value) {
+                this._attribute[name] = value;
+                if (this.getState() === wader.AModel.EXIST) {
+                    this.setState(wader.AModel.UPDATED);
+                }
+            };
 
             this._collection.refresh();
+            return this;
         },
 
         add: function (data) {
