@@ -33,7 +33,7 @@
 
         set: function (data) {
             var method = "post";
-            return this._makeRequest(method, value);
+            return this._makeRequest(method, data);
         },
 
         update: function () {
