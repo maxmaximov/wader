@@ -21,7 +21,7 @@
         resource: null,
         baseUrl: null,
         primaryKey: null,
-        init: function(resource, baseUrl, primaryKey) {
+        init: function(resource, primaryKey, baseUrl) {
             this.primaryKey = primaryKey;
             this.resource = resource;
             this.baseUrl = baseUrl;
