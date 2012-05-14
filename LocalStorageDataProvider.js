@@ -1,9 +1,7 @@
 (function(ns) {
-    "use strict";
+	"use strict";
 	ADataProvider.extend("wader.LocalStorageDataProvider", {
-		_ls: (function(){
-			return window.localStorage,
-		})(),
+		_ls: window.localStorage,
 		_makeRequest: function(method, key, value) {
 			switch (method) {
 				case "get":
