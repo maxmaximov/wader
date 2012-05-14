@@ -7,53 +7,49 @@
 (function(ns) {
     "use strict";
 
-    /*
-    * @abstract wader.ADataProvider
-    */
-    $.Class.extend("wader.ADataProvider",
+	/*
+	* @abstract wader.ADataProvider
+	*/
+	$.Class.extend("wader.ADataProvider",
 
-    /* @Static */
-    {
-    },
+	/* @Static */
+	{
+	},
 
-    /* @Prototype */
-    {
-        resource: null,
-        baseUrl: null,
-        primaryKey: null,
-        init: function(resource, primaryKey, baseUrl) {
-            this.primaryKey = primaryKey;
-            this.resource = resource;
-            this.baseUrl = baseUrl;
-        },
-        get: function (key) {
-            var method = "get";
-            return this._makeRequest(method, key);
-        },
+	/* @Prototype */
+	{
+		/*
+		* @var resourse {String} общий ключ объектов, например, таблица в БД
+		*/
+		resource: null,
+		init: function(resource) {
+			this.resource = resource;
+		},
+		get: function (key) {
+			return this._makeRequest("get", key);
+		},
 
-        set: function (data) {
-            var method = "post";
-            return this._makeRequest(method, data);
-        },
+		set: function (key, value) {
+			return this._makeRequest("post", key, value);
+		},
 
-        update: function () {
-            var method = "put";
-            return this._makeRequest(method, object);
-        },
+		update: function (key, value) {
+			return this._makeRequest("put", key, value);
+		},
 
-        remove: function () {
-            var method = "delete";
-            return this._makeRequest(method, object);
-        },
+		remove: function (key) {
+			return this._makeRequest("delete", key);
+		},
 
-        getMulti: function (filter) {
-            var method = "get";
-            return this._makeRequest(method, filter);
-        },
-        _makeRequest: function(){
-            throw new Error(this.constructor.fullName + ": не реализован метод _makeRequest");
-        }
-    });
+		getMulti: function (filter) {
+			return this._makeRequest("getMulti", filter);
+		},
+		_makeRequest: function(){
+			throw new Error(this.constructor.fullName + ": не реализован метод _makeRequest");
+		}
+	});
 
-    if (ns !== wader) ns.ADataProvider = wader.ADataProvider;
+	if (ns !== wader) {
+		ns.ADataProvider = wader.ADataProvider;
+	}
 })(window.WADER_NS || window);
