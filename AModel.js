@@ -28,60 +28,70 @@
 		},
 		/* @Prototype */
 		{
-			_created_at: null,
-			_updated_at: null,
-			_disabled: false,
-			_collection: null,
-			_dependencies: null,
+			setup: function () {
+				this._createdAt = undefined;
+				this._updatedAt = undefined;
+				this._disabled = undefined;
+				this._collectionClass = undefined;
+				this._collection = undefined;
+				this._dependencies = [];
+				this._dependenciesClasses = [];
+				this._createdAt = new DateTime();
+				this._updatedAt = new DateTime();
+			},
+			construct: function() {
 
-			setup: function (collection, dependencies) {
+			},
+			init: function(data) {
+				var that = this;
+
 				this._id = this.constructor.generateId();
 				this._attribute = {};
 
-				this._collection = collection;
-				this._dependencies = dependencies;
+				if (this._collection) {
+					this._collection = new this._collectionClass();
+				};
 
-				this._disabled = false;
+				this.construct();
+
+				this._dependenciesClasses.forEach(function(dependency) {
+					that._dependencies.push[dependency.getInstance()];
+				});
 
 				this.setState(wader.AModel.NULL);
 
-				this._dp;
 				if (this._collection) {
 					this._dp = this._collection._getDp();
-					this._collection.add(this);
-				}
-			},
-			init: function(data){
+				};
 				if (data) {
 					this._parse(data);
 					if (!this.isValid()) {
-						throw new Error("non valid data");
+						throw new Error("invalid data");
 					};
 				};
-				this._dp = this._collection.getDp();
-				this._created_at = new DateTime();
-				this._updated_at = new DateTime();
+				
+				this.construct();
 			},
-			remove: function(){
-				//удаление сразу с сервера
-				this._notifyObservers();
+			remove: function() {
+				this._collection.remove(this);
+				this.setState(wader.AModel.DELETED);
+				this._dp.remove(this.getPrimaryKey());
 			},
-			save: function(){
+			save: function() {
 				if (this.isValid()) {
 					this._push();
 				}
 			},
-			load: function(){
-				throw new Error("IMPLEMENT IT, BITCH");
-				this._pull();
+			load: function() {
+				throw new Error("IMPLEMENT IT, BITCH in " + this.constructor.fullName);
 			},
-			_get: function(key){
+			_get: function(key) {
 				if (!(key in this._attribute)) {
 					throw new Error("Не знаю ничего про свойство " + key + " атрибута модели " + this.constructor.fullName);
 				}
 				return this._attribute[key];
 			},
-			_set: function(key, value){
+			_set: function(key, value) {
 				if (!(name in this._attribute)) {
 					throw new Error("Не знаю ничего про свойство " + key + " атрибута модели " + this.constructor.fullName);
 				}
@@ -89,35 +99,47 @@
 				if (this._attribute[key] != value) {
 					this._attribute[key] = value;
 					this.setState(wader.AModel.UPDATED);
-					this._updated_at = new DateTime(); // Подумать
 				};
 				return this;
 			},
-			_push: function(){
+			_push: function() {
 				//отправить экземпляр на сервер
 				var promise = new $.Deferred();
-				$.when(this._dp.set(this.getPrimaryKey(), this.toJson()).done(this.proxy("_onPushDone", promise)).fail(this.proxy("_onPushFail", promise));
+				$.when(this._dp.set(this.getPrimaryKey(), this.toJson()))
+					.done(this.proxy("_onPushDone", promise))
+					.fail(this.proxy("_onPushFail", promise));
 			},
-			_pull: function(){
+			_pull: function() {
 				//получить последнюю сохраненную версию с сервера и перезаписать ею экземпляр
 				var promise = new $.Deferred();
-				$.when(this._dp.get(this.getPrimaryKey()).done(this.proxy("_onPullDone", promise)).fail(this.proxy("_onPullFail", promise));
+				$.when(this._dp.get(this.getPrimaryKey()))
+					.done(this.proxy("_onPullDone", promise))
+					.fail(this.proxy("_onPullFail", promise));
 			},
 
-
-			_onPullDone: function(data){
-				this._updated_at = new DateTime();
+			_onPullDone: function(data) {
+				this._updatedAt = new DateTime();
 				this.setState(wader.AModel.EXIST);
-				/*...*/
 			},
 			_onPullFail: function(data) {
-
+				throw new Error("pull fail");
 			},
-			_onPushDone: function(data){},
-			_onPushFail: function(data){},
+			_onPushDone: function(data) {
+				if (this.isCreated()) {
+					this._collection.add(this);
+				};
+				this.setState(wader.AModel.EXIST);
+			},
+			_onPushFail: function(data) {
+				throw new Error("push fail");
+			},
 
-			_validate: function(){},
-			_parse: function(data){},
+			_validate: function() {
+				throw new Error("В модели " + this.constructor.fullName + " не определен метод _validate");
+			},
+			_parse: function(data) {
+				throw new Error("В модели " + this.constructor.fullName + " не определен метод _parse");
+			},
 
 			setState: function (state) {
 				this._state = state;
@@ -135,15 +157,15 @@
 			disable: function () {
 				this._disabled = true;
 				this._collection.refresh();
-				this._updated_at = new DateTime();
+				this._updatedAt = new DateTime();
 			},
 
 			enable: function () {
 				this._disabled = false;
 				this._collection.refresh();
-				this._updated_at = new DateTime();
+				this._updatedAt = new DateTime();
 			},
-			reset: function(){
+			reset: function() {
 				//сбросить на последнее сохраненное состояние
 				if (this.isModified()) {
 					this._pull();
@@ -168,12 +190,8 @@
 				return this.getState() === wader.AModel.EXIST;
 			},
 
-			getState: function () {
-				return this._state;
-			},
-
 			getPrimaryKey: function() {
-				throw new Error("not implemented, fuckin' yeti");
+				throw new Error("В модели " + this.constructor.fullName + " не определен метод getPrimaryKey");
 			},
 
 			isValid: function() {
