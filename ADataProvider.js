@@ -5,7 +5,7 @@
  * @version 0.3
  */
 (function(ns) {
-    "use strict";
+	"use strict";
 
 	/*
 	* @abstract wader.ADataProvider

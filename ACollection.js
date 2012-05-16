@@ -14,19 +14,27 @@
 
     /* @Static */
     {
+        _instance: void("Putin"),
+        getInstance: function () {
+            var args = Array.prototype.slice.call(arguments);
+            if (!this._instance) {
+                this._instance = new this(args);
+            }
+            return this._instance;
+        }
     },
 
     /* @Prototype */
     {
-        setup: function (dependencies) {
-            this._dependencies = dependencies;
-
+        setup: function () {
             this._prepared = false;
             this._items = [];
             this._promises = [];
             this._observers = [];
-            this._promise;
-            this._dp;
+            this._promise = void("Putin");
+            this.construct();
+            this.DataproviderClass = RESTDataProvider;
+            this._dp = new this.DataproviderClass(this._dpKey, "/api/v1/");
         },
 
         _addPromise: function (promise) {
@@ -54,9 +62,9 @@
             this._notifyObservers();
         },
 
-        getById: function (id) {
+        getByModelId: function (id) {
             for (var i = 0, l = this._items.length; i < l; i++) {
-                if (this._items[i] && this._items[i].getId() == id) {
+                if (this._items[i] && this._items[i].getModelId() == id) {
                     return this._items[i];
                 }
             }
@@ -66,7 +74,7 @@
             var items = [];
 
             for (var i = 0, l = this._items.length; i < l; i++) {
-                if (this._items[i] && this._items[i].getState() !== wader.AModel.DELETED && this._items[i].getState() !== wader.AModel.NULL && !this._items[i].isDisabled()) {
+                if (this._items[i] && !this._items[i].isDeleted() && !this._items[i].isCreated() && !this._items[i].isDisabled()) {
                     items.push(this._items[i]);
                 }
             }
@@ -88,9 +96,8 @@
 
         toJson: function () {
             var items = [];
-
             for (var i = 0, l = this._items.length; i < l; i++) {
-                if (this._items[i] && this._items[i].getState() !== wader.AModel.DELETED && this._items[i].getState() !== wader.AModel.NULL) {
+                if (this._items[i] && !this._items[i].isDeleted() && !this._items[i].isNew()) {
                     items[i] = this._items[i].toJson();
                 }
             }

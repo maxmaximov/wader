@@ -1,8 +1,12 @@
 (function(ns) {
-    "use strict";
+	"use strict";
 
 	ADataProvider.extend("wader.RESTDataProvider", {
 		/* @Private */
+		init: function(resource, baseUrl) {
+			this.resource = resource;
+			this.baseUrl = baseUrl;
+		},
 		_buildQueryParams: function(data){
 			var value,
 				key,
@@ -54,13 +58,15 @@
 				data = {};
 			switch (method) {
 				case "get":
-					url += key;
+					if (key) {
+						url += key;
+					};
 					return this._handleResult(url, method);
 				case "post":
-					return this._handleResult(url, method, value);
+					return this._handleResult(url, method, JSON.stringify(value));
 				case "put":
 					url += key;
-					return this._handleResult(url, method, value);
+					return this._handleResult(url, method, JSON.stringify(value));
 				case "delete":
 					url += key;
 					return this._handleResult(url, method);
