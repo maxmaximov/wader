@@ -94,17 +94,18 @@
 
 				if (this._attribute[key] != value) {
 					this._attribute[key] = value;
-					if (!this.isNew()) {
+					if (this.isNew() || this.isCreated()) {
+						this.setState(wader.AModel.CREATED);
+					} else {
 						this.setState(wader.AModel.UPDATED);
-					};
+					}
 				};
 				return this;
 			},
 			_push: function() {
 				//отправить экземпляр на сервер
 				var promise = new $.Deferred();
-
-				var request = this.isNew() ? this._dp.set("", this.toJson()) : this._dp.update(this.getPrimaryKey(), this.toJson());
+				var request = this.isCreated() ? this._dp.set("", this.toJson()) : this._dp.update(this.getPrimaryKey(), this.toJson());
 				request.done(this.proxy("_onPushDone", promise));
 				request.fail(this.proxy("_onPushFail", promise));
 			},
@@ -123,11 +124,13 @@
 			_onPullFail: function(data) {
 				throw new Error("pull fail");
 			},
-			_onPushDone: function(data) {
+			_onPushDone: function(promise, data) {
 				if (this.isCreated()) {
 					this._collection.add(this);
+					this._collection.refresh();
 				};
 				this.setState(wader.AModel.EXIST);
+				this._onSave(promise, data);
 			},
 			_onPushFail: function(data) {
 				throw new Error("push fail");

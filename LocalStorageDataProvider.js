@@ -3,9 +3,10 @@
 	ADataProvider.extend("wader.LocalStorageDataProvider", {
 		_ls: window.localStorage,
 		_makeRequest: function(method, key, value) {
+			var newKey = this.resource + "_" + key;
 			switch (method) {
 				case "get":
-					var result = this._ls.getItem(key);
+					var result = this._ls.getItem(newKey);
 					try {
 						return JSON.parse(result);
 					} catch (e) {
@@ -13,9 +14,9 @@
 					}
 				case "post":
 				case "put":
-					return this._ls.setItem(key, JSON.stringify(value));
+					return this._ls.setItem(newKey, JSON.stringify(value));
 				case "delete":
-					return this._ls.removeItem(key);
+					return this._ls.removeItem(newKey);
 				default:
 					break;
 			}
