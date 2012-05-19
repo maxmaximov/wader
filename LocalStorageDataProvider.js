@@ -21,8 +21,22 @@
 					break;
 			}
 		},
-		getMulti: function(){
-			throw new Error("\"LocalStorageDataProvider\" not implement MultiGet operation");
+		getMulti: function(pattern){
+			if (!pattern instanceof RegExp) {
+				throw new Error("Invalid params in LocalStorageDataProvider.getMulti: pattern must be instance of RegExp");
+			};
+			var items = [];
+			for (var key in this._ls) {
+				if (this._ls.hasOwnProperty(key)) {
+					if (pattern.test(key)) {
+						var obj = {};
+						key = key.replace(this.resource + "_", "")
+						obj[key] = this.get(key);
+						items.push(obj);
+					};
+				};
+			}
+			return items;
 		}
 	});
 
