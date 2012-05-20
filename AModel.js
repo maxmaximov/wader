@@ -203,6 +203,27 @@
 				throw new Error("В модели " + this.constructor.fullName + " не определен метод _parse");
 			},
 
+			fromArray: function(data){
+				for (var field in data) {
+					var setterName = "set" + field.charAt(0).toUpperCase() + attr.substr(1, field.length-1);
+					if (this[setterName]) {
+						this[setterName](data[field]);
+					};
+				}
+				return result;
+			},
+
+			toArray: function(){
+				var result = {
+					"model_id": this.getModelId()
+				};
+				for (var attr in this._attributes) {
+					var getterName = "get" + attr.charAt(0).toUpperCase() + attr.substr(1, attr.length-1);
+					result[attr] = this[getterName]();
+				}
+				return result;
+			},
+
 			setState: function (state) {
 				this._state = state;
 			},
