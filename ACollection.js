@@ -94,11 +94,11 @@
             return items;
         },
 
-        toJson: function () {
+        toArray: function () {
             var items = [];
             for (var i = 0, l = this._items.length; i < l; i++) {
                 if (this._items[i] && !this._items[i].isDeleted() && !this._items[i].isNew()) {
-                    items[i] = this._items[i].toJson();
+                    items[i] = this._items[i].toArray();
                 }
             }
 

@@ -24,6 +24,12 @@
 					wader.AModel.count = 1;
 				}
 				return wader.AModel.count++;
+			},
+			getCollection: function() {
+				return this._collection;
+			},
+			getAttributes: function() {
+				return this._attributes;
 			}
 		},
 		/* @Prototype */
@@ -39,6 +45,7 @@
 				this._dependenciesClasses = [];
 				this._createdAt = new DateTime();
 				this._updatedAt = new DateTime();
+				this._lastValidationErrors = {};
 			},
 			construct: function() {
 
@@ -55,13 +62,10 @@
 					this._dp = this._collection._getDp();
 				};
 
-				this._dependenciesClasses.forEach(function(dependency) {
-					that._dependencies.push[dependency.getInstance()];
-				});
-
 				this.setState(wader.AModel.NULL);
+
 				if (data) {
-					this._parse(data);
+					this.fromArray(data);
 					if (!this.isValid()) {
 						throw new Error("invalid data in " + this.constructor.fullName);
 					}
@@ -90,8 +94,6 @@
 				return this._attribute[key];
 			},
 			_set: function(key, value) {
-				this._validateType(value, this._attributes[key].type);
-
 				if (this._attribute[key] != value) {
 					this._attribute[key] = value;
 					if (this.isNew() || this.isCreated()) {
@@ -105,7 +107,8 @@
 			_push: function() {
 				//отправить экземпляр на сервер
 				var promise = new $.Deferred();
-				var request = this.isCreated() ? this._dp.set("", this.toJson()) : this._dp.update(this.getPrimaryKey(), this.toJson());
+				var arr = this.toArray()
+				var request = this.isCreated() ? this._dp.set("", arr) : this._dp.update(this.getPrimaryKey(), arr);
 				request.done(this.proxy("_onPushDone", promise));
 				request.fail(this.proxy("_onPushFail", promise));
 			},
@@ -127,17 +130,13 @@
 			_onPushDone: function(promise, data) {
 				if (this.isCreated()) {
 					this._collection.add(this);
-					this._collection.refresh();
 				};
+				this._collection.refresh();
 				this.setState(wader.AModel.EXIST);
 				this._onSave(promise, data);
 			},
 			_onPushFail: function(data) {
 				throw new Error("push fail");
-			},
-
-			_validateType: function(value, type) {
-
 			},
 
 			_validate: function() {
@@ -159,6 +158,7 @@
 						var rawString = Object.prototype.toString.call(value).slice(8, -1);
 
 						if (!type) {
+							debugger;
 							throw new Error("Incorrect Type");
 						}
 						if (type == "enum") {
@@ -196,8 +196,10 @@
 						};
 					};
 				}
-				Logger.info(this, errors);
-				return errors;
+				this._lastValidationErrors = errors;
+			},
+			getErrors: function(){
+				return this._lastValidationErrors;
 			},
 			_parse: function(data) {
 				throw new Error("В модели " + this.constructor.fullName + " не определен метод _parse");
@@ -205,21 +207,37 @@
 
 			fromArray: function(data){
 				for (var field in data) {
-					var setterName = "set" + field.charAt(0).toUpperCase() + attr.substr(1, field.length-1);
-					if (this[setterName]) {
-						this[setterName](data[field]);
-					};
+					var setterName = "set" + field.charAt(0).toUpperCase() + field.substr(1, field.length-1),
+						value = data[field];
+					if (field in this._attributes) {
+						this[setterName](value);
+					} else {
+						Logger.info(this, field);
+					}
 				}
-				return result;
 			},
 
 			toArray: function(){
 				var result = {
-					"model_id": this.getModelId()
+					"model_id": this.getModelId(),
+					"_created_at": this.getCreatedAt(),
+					"disabled": this.isDisabled()
 				};
 				for (var attr in this._attributes) {
 					var getterName = "get" + attr.charAt(0).toUpperCase() + attr.substr(1, attr.length-1);
 					result[attr] = this[getterName]();
+				}
+				//повторная сериализация вложенных объектов
+				for (var key in result) {
+					if (typeof result[key] == "object") {
+						var dep = this._attribute[key];
+						if (dep instanceof wader.AModel) {
+							//сериализуем сущность в ссылку на ПК
+							result[key] = dep.getPrimaryKey();
+						} else if (dep instanceof DateTime) {
+							result[key] = dep.format("%c");
+						};
+					}
 				}
 				return result;
 			},
@@ -290,8 +308,17 @@
 			},
 
 			isValid: function() {
-				return Object.keys(this._validate()).length === 0;
+				this._validate();
+				if (Object.keys(this.getErrors()).length === 0) {
+					return true;
+				} else {
+					Logger.warn(this, this.getErrors());
+					return false;
+				}
 			},
+			toString: function() {
+				return this.getPrimaryKey();
+			}
 		});
 	if (ns !== wader) {
 		ns.AModel = wader.AModel;
