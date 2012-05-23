@@ -81,6 +81,8 @@
 			},
 			save: function() {
 				if (this.isValid()) {
+					this._collection.add(this);
+					this._collection.refresh();
 					this._push();
 				}
 			},
@@ -128,10 +130,10 @@
 				throw new Error("pull fail");
 			},
 			_onPushDone: function(promise, data) {
-				if (this.isCreated()) {
+				/*if (this.isCreated()) {
 					this._collection.add(this);
-				};
 				this._collection.refresh();
+				};*/
 				this.setState(wader.AModel.EXIST);
 				this._onSave(promise, data);
 			},
@@ -264,14 +266,14 @@
 
 			disable: function () {
 				this._disabled = true;
-				this._collection.refresh();
 				this._updatedAt = new DateTime();
+				this._collection.refresh();
 			},
 
 			enable: function () {
 				this._disabled = false;
-				this._collection.refresh();
 				this._updatedAt = new DateTime();
+				this._collection.refresh();
 			},
 			reset: function() {
 				//сбросить на последнее сохраненное состояние

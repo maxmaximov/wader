@@ -74,7 +74,7 @@
             var items = [];
 
             for (var i = 0, l = this._items.length; i < l; i++) {
-                if (this._items[i] && !this._items[i].isDeleted() && !this._items[i].isCreated() && !this._items[i].isDisabled()) {
+                if (this._items[i] && !this._items[i].isDeleted() && !this._items[i].isDisabled()) {
                     items.push(this._items[i]);
                 }
             }
