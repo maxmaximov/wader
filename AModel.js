@@ -76,12 +76,16 @@
 			},
 			remove: function() {
 				this._collection.remove(this);
+				if (!this.isCreated()) {
+					this._dp.remove(this.getPrimaryKey());
+				};
 				this.setState(wader.AModel.DELETED);
-				this._dp.remove(this.getPrimaryKey());
 			},
 			save: function() {
 				if (this.isValid()) {
-					this._collection.add(this);
+					if (this.isCreated()) {
+						this._collection.add(this);
+					};
 					this._collection.refresh();
 					this._push();
 				}
