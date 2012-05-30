@@ -76,7 +76,7 @@
 			},
 			remove: function() {
 				this._collection.remove(this);
-				if (!this.isCreated()) {
+				if (!this.isCreated() && !this.isDeleted()) {
 					this._dp.remove(this.getPrimaryKey());
 				};
 				this.setState(wader.AModel.DELETED);
