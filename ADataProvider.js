@@ -7,100 +7,49 @@
 (function(ns) {
     "use strict";
 
-    /*
-    * @abstract wader.ADataProvider
-    */
-    $.Class.extend("wader.ADataProvider",
+	/*
+	* @abstract wader.ADataProvider
+	*/
+	$.Class.extend("wader.ADataProvider",
 
-    /* @Static */
-    {
-    },
+	/* @Static */
+	{
+	},
 
-    /* @Prototype */
-    {
-        resource: null,
-        baseUrl: null,
-        primaryKey: null,
-        init: function(resource, baseUrl, primaryKey) {
-            this.primaryKey = primaryKey;
-            this.resource = resource;
-            this.baseUrl = baseUrl;
-        },
-        get: function (key) {
-            var method = "get";
-            return this._makeRequest(method, key);
-        },
+	/* @Prototype */
+	{
+		/*
+		* @var resourse {String} общий ключ объектов, например, таблица в БД
+		*/
+		resource: null,
+		init: function(resource) {
+			this.resource = resource;
+		},
+		get: function (key) {
+			return this._makeRequest("get", key);
+		},
 
-        set: function (data) {
-            var method = "post";
-            return this._makeRequest(method, value);
-        },
+		set: function (key, value) {
+			return this._makeRequest("post", key, value);
+		},
 
-        update: function () {
-            var method = "put";
-            return this._makeRequest(method, object);
-        },
+		update: function (key, value) {
+			return this._makeRequest("put", key, value);
+		},
 
-        remove: function () {
-            var method = "delete";
-            return this._makeRequest(method, object);
-        },
+		remove: function (key) {
+			return this._makeRequest("delete", key);
+		},
 
-        getMulti: function (filter) {
-            var method = "get";
-            return this._makeRequest(method, filter);
-        },
-        /* @Private */
-        _buildQueryParams: function(data){
-            var value,
-                key,
-                tmp = [],
-                that = this,
-                urlencode = function(str) {
-                    str = (str+"").toString();
-                    return encodeURIComponent(str).replace(/!/g, "%21").replace(/"/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/\*/g, "%2A").replace(/%20/g, "+");
-                },
-                arg_separator = "&",
-                buildQueryHelper = function (key, val) {
-                    var k, tmp = [];
+		getMulti: function (filter) {
+			return this._makeRequest("getMulti", filter);
+		},
+		_makeRequest: function(){
+			throw new Error(this.constructor.fullName + ": не реализован метод _makeRequest");
+		}
+	});
 
-                    if (val === true) {
-                        val = "1";
-                    } else if (val === false) {
-                        val = "0";
-                    }
-                    if (val !== null && typeof(val) === "object") {
-                        for (k in val) {
-                            if (val[k] !== null) {
-                                tmp.push(buildQueryHelper(key + "[" + k + "]", val[k]));
-                            }
-                        }
-                        return tmp.join(arg_separator);
-                    } else if (typeof(val) !== "function") {
-                        return urlencode(key) + "=" + urlencode(val);
-                    } else if (typeof(val) == "function") {
-                        return "";
-                    } else {
-                        throw new Error("Incorrect Parameters");
-                    }
-                };
-            if (!data) {
-                return "";
-            };
-            if (typeof data == "string") {
-                return data + "/";
-            }
-            for (key in data) {
-                value = data[key];
-                tmp.push(buildQueryHelper(key, value));
-            }
-
-            return "?" + tmp.join(arg_separator);
-        },
-        _makeRequest: function(){
-            throw new Error(this.constructor.fullName + ": не реализован метод _makeRequest");
-        }
-    });
-
-    if (ns !== wader) ns.ADataProvider = wader.ADataProvider;
+	if (ns !== wader) {
+		ns.ADataProvider = wader.ADataProvider;
+	}
 })(window.WADER_NS || window);
