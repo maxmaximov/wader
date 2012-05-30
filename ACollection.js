@@ -127,6 +127,12 @@
                     return;
                 }
             }
+        },
+
+        _sort: function (items, key) {
+            items.sort(function(a, b){
+                return a[key]() - b[key]();
+            });
         }
     });
 
