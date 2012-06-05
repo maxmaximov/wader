@@ -46,6 +46,13 @@
 				this._createdAt = new DateTime();
 				this._updatedAt = new DateTime();
 				this._lastValidationErrors = {};
+				this._observers = {
+					0: [],
+					1: [],
+					2: [],
+					3: [],
+					4: []
+				};
 			},
 			construct: function() {
 
@@ -92,6 +99,12 @@
 			},
 			load: function() {
 				throw new Error("IMPLEMENT IT, BITCH in " + this.constructor.fullName);
+			},
+			_addObserver: function(event, callback) {
+				if (!event in this._observers) {
+					throw new Error("Unknown event: " + event);
+				};
+				this._observers[event].push(callback);
 			},
 			_get: function(key) {
 				if (!(key in this._attributes)) {
@@ -249,7 +262,11 @@
 			},
 
 			setState: function (state) {
+				var that = this;
 				this._state = state;
+				this._observers[state].forEach(function(callback) {
+					callback(that);
+				});
 			},
 
 			getState: function (state) {
@@ -307,6 +324,26 @@
 
 			isExist: function() {
 				return this.getState() === wader.AModel.EXIST;
+			},
+
+			onNew: function(callback) {
+				return this._addObserver(wader.AModel.NULL, callback);
+			},
+
+			onCreated: function(callback) {
+				return this._addObserver(wader.AModel.CREATED, callback);
+			},
+
+			onModified: function(callback) {
+				return this._addObserver(wader.AModel.UPDATED, callback);
+			},
+
+			onDeleted: function(callback) {
+				return this._addObserver(wader.AModel.DELETED, callback);
+			},
+
+			onExist: function(callback) {
+				return this._addObserver(wader.AModel.EXIST, callback);
 			},
 
 			getPrimaryKey: function() {
