@@ -25,9 +25,11 @@
 				}
 				return wader.AModel.count++;
 			},
+
 			getCollection: function() {
 				return this._collection;
 			},
+
 			getAttributes: function() {
 				return this._attributes;
 			}
@@ -51,12 +53,16 @@
 					1: [],
 					2: [],
 					3: [],
-					4: []
+					4: [],
+					5: []
 				};
+				this._silent = false;
 			},
+
 			construct: function() {
 
 			},
+
 			init: function(data) {
 				var that = this;
 
@@ -78,9 +84,10 @@
 					}
 					this.setState(wader.AModel.EXIST);
 				};
-				
+
 				this.construct();
 			},
+
 			remove: function() {
 				this._collection.remove(this);
 				if (!this.isCreated() && !this.isDeleted()) {
@@ -88,6 +95,7 @@
 				};
 				this.setState(wader.AModel.DELETED);
 			},
+
 			save: function() {
 				if (this.isValid()) {
 					if (this.isCreated()) {
@@ -97,32 +105,61 @@
 					this._push();
 				}
 			},
+
 			load: function() {
 				throw new Error("IMPLEMENT IT, BITCH in " + this.constructor.fullName);
 			},
+
 			_addObserver: function(event, callback) {
 				if (!event in this._observers) {
 					throw new Error("Unknown event: " + event);
-				};
+				}
+
 				this._observers[event].push(callback);
 			},
+
+			_removeObserver: function(event, callback) {
+				if (!event in this._observers) {
+					throw new Error("Unknown event: " + event);
+				};
+
+				for (var i = 0, l = this._observers[event].length; i < l; i++) {
+					if (this._observers[event][i] === callback) {
+						this._observers[event].splice(i, 1);
+						break;
+					}
+				}
+			},
+
 			_get: function(key) {
 				if (!(key in this._attributes)) {
 					throw new Error("Не знаю ничего про свойство " + key + " атрибута модели " + this.constructor.fullName);
 				}
 				return this._attribute[key];
 			},
+
 			_set: function(key, value) {
 				if (this._attribute[key] != value) {
 					this._attribute[key] = value;
-					if (this.isNew() || this.isCreated()) {
+
+					if (!this.isSilent()) {
+						var that = this;
+						this._observers[5].forEach(function(callback) {
+							callback(that);
+						})
+					}
+
+					if (this.isCreated()) {
+					} else if (this.isNew()) {
 						this.setState(wader.AModel.CREATED);
 					} else {
 						this.setState(wader.AModel.UPDATED);
 					}
-				};
+				}
+
 				return this;
 			},
+
 			_push: function() {
 				//отправить экземпляр на сервер
 				var promise = new $.Deferred();
@@ -131,6 +168,7 @@
 				request.done(this.proxy("_onPushDone", promise));
 				request.fail(this.proxy("_onPushFail", promise));
 			},
+
 			_pull: function() {
 				//получить последнюю сохраненную версию с сервера и перезаписать ею экземпляр
 				var promise = new $.Deferred();
@@ -143,9 +181,11 @@
 				this._updatedAt = new DateTime();
 				this.setState(wader.AModel.EXIST);
 			},
+
 			_onPullFail: function(data) {
 				throw new Error("pull fail");
 			},
+
 			_onPushDone: function(promise, data) {
 				/*if (this.isCreated()) {
 					this._collection.add(this);
@@ -154,6 +194,7 @@
 				this.setState(wader.AModel.EXIST);
 				this._onSave(promise, data);
 			},
+
 			_onPushFail: function(data) {
 				throw new Error("push fail");
 			},
@@ -217,9 +258,11 @@
 				}
 				this._lastValidationErrors = errors;
 			},
+
 			getErrors: function(){
 				return this._lastValidationErrors;
 			},
+
 			_parse: function(data) {
 				throw new Error("В модели " + this.constructor.fullName + " не определен метод _parse");
 			},
@@ -296,14 +339,20 @@
 				this._updatedAt = new DateTime();
 				this._collection.refresh();
 			},
+
 			reset: function() {
 				//сбросить на последнее сохраненное состояние
 				if (this.isModified()) {
 					this._pull();
 				};
 			},
+
 			isDisabled: function () {
 				return this._disabled;
+			},
+
+			isSilent: function () {
+				return this._silent;
 			},
 
 			isNew: function() {
@@ -314,7 +363,7 @@
 				return this.getState() === wader.AModel.CREATED;
 			},
 
-			isModified: function() {
+			isUpdated: function() {
 				return this.getState() === wader.AModel.UPDATED;
 			},
 
@@ -330,20 +379,24 @@
 				return this._addObserver(wader.AModel.NULL, callback);
 			},
 
-			onCreated: function(callback) {
+			onCreate: function(callback) {
 				return this._addObserver(wader.AModel.CREATED, callback);
 			},
 
-			onModified: function(callback) {
+			onUpdate: function(callback) {
 				return this._addObserver(wader.AModel.UPDATED, callback);
 			},
 
-			onDeleted: function(callback) {
+			onDelete: function(callback) {
 				return this._addObserver(wader.AModel.DELETED, callback);
 			},
 
 			onExist: function(callback) {
 				return this._addObserver(wader.AModel.EXIST, callback);
+			},
+
+			onModify: function(callback) {
+				return this._addObserver(5, callback);
 			},
 
 			getPrimaryKey: function() {
@@ -359,6 +412,22 @@
 					return false;
 				}
 			},
+
+			setSilentOn: function() {
+				this._silent = true;
+			},
+
+			setSilentOff: function() {
+				this._silent = false;
+			},
+
+			touch: function() {
+				var that = this;
+				this._observers[5].forEach(function(callback) {
+					callback(that);
+				})
+			},
+
 			toString: function() {
 				return this.getPrimaryKey();
 			}
