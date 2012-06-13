@@ -71,11 +71,12 @@
 
 				this.construct();
 
+				this.setState(wader.AModel.NULL);
+
 				if (this._collection) {
 					this._dp = this._collection._getDp();
+					this._collection.add(this);
 				};
-
-				this.setState(wader.AModel.NULL);
 
 				if (data) {
 					this.fromArray(data);
@@ -84,8 +85,6 @@
 					}
 					this.setState(wader.AModel.EXIST);
 				};
-
-				this.construct();
 			},
 
 			remove: function() {
@@ -98,9 +97,6 @@
 
 			save: function() {
 				if (this.isValid()) {
-					if (this.isCreated()) {
-						this._collection.add(this);
-					};
 					this._collection.refresh();
 					this._push();
 				}
@@ -426,6 +422,12 @@
 				this._observers[5].forEach(function(callback) {
 					callback(that);
 				})
+			},
+
+			refreshCollection: function() {
+				if (this._collection) {
+                    this._collection.refresh();
+                }
 			},
 
 			toString: function() {
