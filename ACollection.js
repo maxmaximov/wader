@@ -125,15 +125,18 @@
 
         add: function (item) {
             this._items.push(item);
+            this._notifyObservers();
         },
 
         remove: function (item) {
             for (var i = 0, l = this._items.length; i < l; i++) {
                 if (this._items[i] && this._items[i] === item) {
                     this._items[i] = undefined;
-                    return;
+                    break;
                 }
             }
+
+            this._notifyObservers();
         },
 
         _sort: function (items, key) {

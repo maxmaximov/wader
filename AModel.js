@@ -75,7 +75,6 @@
 
 				if (this._collection) {
 					this._dp = this._collection._getDp();
-					this._collection.add(this);
 				};
 
 				if (data) {
@@ -97,7 +96,6 @@
 
 			save: function() {
 				if (this.isValid()) {
-					this._collection.refresh();
 					this._push();
 				}
 			},
@@ -187,8 +185,11 @@
 					this._collection.add(this);
 				this._collection.refresh();
 				};*/
-				this.setState(wader.AModel.EXIST);
+
+				//this.setState(wader.AModel.EXIST);
+
 				this._onSave(promise, data);
+				this._collection.refresh();
 			},
 
 			_onPushFail: function(data) {
@@ -422,12 +423,6 @@
 				this._observers[5].forEach(function(callback) {
 					callback(that);
 				})
-			},
-
-			refreshCollection: function() {
-				if (this._collection) {
-                    this._collection.refresh();
-                }
 			},
 
 			toString: function() {
