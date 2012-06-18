@@ -124,8 +124,10 @@
         },
 
         add: function (item) {
-            this._items.push(item);
-            this._notifyObservers();
+            if (this._items.indexOf(item) === -1) {
+                this._items.push(item);
+                this._notifyObservers();
+            }
         },
 
         remove: function (item) {
