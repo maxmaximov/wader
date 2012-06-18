@@ -402,12 +402,17 @@
 
 			isValid: function() {
 				this._validate();
-				if (Object.keys(this.getErrors()).length === 0) {
+				if (Object.keys(this.getErrors()).length === 0 && this.validate()) {
 					return true;
 				} else {
 					Logger.warn(this, this.getErrors());
 					return false;
 				}
+			},
+
+			validate: function() {
+				Logger.warn("В модели " + this.constructor.fullName + " не определен метод validate");
+				return true;
 			},
 
 			setSilentOn: function() {
@@ -416,6 +421,13 @@
 
 			setSilentOff: function() {
 				this._silent = false;
+			},
+
+			addToCollection: function() {
+				if (!this.isCreated() || !this.isNew()) {
+					this._collection.add(this);
+				};
+				return this;
 			},
 
 			touch: function() {
