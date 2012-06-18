@@ -87,10 +87,10 @@
 			},
 
 			remove: function() {
-				this._collection.remove(this);
 				if (!this.isCreated() && !this.isDeleted()) {
 					this._dp.remove(this.getPrimaryKey());
 				};
+				this._collection.remove(this);
 				this.setState(wader.AModel.DELETED);
 			},
 
