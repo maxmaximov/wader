@@ -35,6 +35,13 @@
             this.construct();
             this.DataproviderClass = RESTDataProvider;
             this._dp = new this.DataproviderClass(this._dpKey, "/api/v1/");
+
+            this._observers2 = {
+                "add": [],
+                "remove": [],
+                "update": [],
+                "modify": []
+            };
         },
 
         _addPromise: function (promise) {
@@ -60,6 +67,11 @@
 
         refresh: function () {
             this._notifyObservers();
+        },
+
+        refresh2: function (item) {
+            this._notifyObservers();
+            this._notifyObservers2("update", item);
         },
 
         getByModelId: function (id) {
@@ -112,7 +124,8 @@
         removeObserver: function (callback) {
             for (var i = 0, l = this._observers.length; i < l; i++) {
                 if (this._observers[i] === callback) {
-                    this._observers = this._observers.slice(i, 1);
+                    this._observers.splice(i, 1);
+                    break;
                 }
             }
         },
@@ -127,6 +140,7 @@
             if (this._items.indexOf(item) === -1) {
                 this._items.push(item);
                 this._notifyObservers();
+                this._notifyObservers2("add", item);
             }
         },
 
@@ -139,12 +153,60 @@
             }
 
             this._notifyObservers();
+            this._notifyObservers2("remove", item);
         },
 
         _sort: function (items, key) {
             items.sort(function(a, b){
                 return a[key]() - b[key]();
             });
+        },
+
+        addObserver2: function(event, callback) {
+            if (!event in this._observers2) {
+                throw new Error("Unknown event: " + event);
+            }
+
+            this._observers2[event].push(callback);
+        },
+
+        removeObserver2: function(event, callback) {
+            if (!event in this._observers2) {
+                throw new Error("Unknown event: " + event);
+            };
+
+            for (var i = 0, l = this._observers2[event].length; i < l; i++) {
+                if (this._observers2[event][i] === callback) {
+                    this._observers2[event].splice(i, 1);
+                    break;
+                }
+            }
+        },
+
+        _notifyObservers2: function(event, data) {
+            if (!event in this._observers2) {
+                throw new Error("Unknown event: " + event);
+            }
+
+            for (var i = 0, l = this._observers2[event].length; i < l; i++) {
+                this._observers2[event][i](data);
+            }
+        },
+
+        onAdd: function(callback) {
+            return this._addObserver2("add", callback);
+        },
+
+        onRemove: function(callback) {
+            return this._addObserver2("remove", callback);
+        },
+
+        onUpdate: function(callback) {
+            return this._addObserver2("update", callback);
+        },
+
+        onModify: function(callback) {
+            return this._addObserver2("modify", callback);
         }
     });
 
