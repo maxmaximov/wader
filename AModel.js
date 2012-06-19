@@ -95,11 +95,9 @@
             },
 
             save: function() {
-                if (this.isValid()) {
-                    var promise = new $.Deferred();
-                    this._push(promise);
-                    return promise;
-                }
+                var promise = new $.Deferred();
+                this._push(promise);
+                return promise;
             },
 
             load: function() {
