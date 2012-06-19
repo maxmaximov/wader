@@ -96,7 +96,9 @@
 
             save: function() {
                 if (this.isValid()) {
-                    this._push();
+                    var promise = new $.Deferred();
+                    this._push(promise);
+                    return promise;
                 }
             },
 
@@ -154,9 +156,8 @@
                 return this;
             },
 
-            _push: function() {
+            _push: function(promise) {
                 //отправить экземпляр на сервер
-                var promise = new $.Deferred();
                 var arr = this.toArray()
                 var request = this.isCreated() ? this._dp.set("", arr) : this._dp.update(this.getPrimaryKey(), arr);
                 request.done(this.proxy("_onPushDone", promise));
@@ -189,12 +190,14 @@
                 //this.setState(wader.AModel.EXIST);
 
                 this._onSave(promise, data);
+
                 this._collection.refresh();
                 this._collection.refresh2(this);
             },
 
-            _onPushFail: function(data) {
-                throw new Error("push fail");
+            _onPushFail: function(promise, data) {
+                promise.reject();
+                //throw new Error("push fail");
             },
 
             _validate: function() {
