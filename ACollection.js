@@ -70,7 +70,6 @@
         },
 
         refresh2: function (item) {
-            this._notifyObservers();
             this._notifyObservers2("update", item);
         },
 

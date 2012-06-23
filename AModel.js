@@ -278,7 +278,7 @@
                 }
             },
 
-            toArray: function(){
+            toArray: function(recursively){
                 var result = {
                     "model_id": this.getModelId(),
                     "_created_at": this.getCreatedAt(),
@@ -294,7 +294,11 @@
                         var dep = this._attribute[key];
                         if (dep instanceof wader.AModel) {
                             //сериализуем сущность в ссылку на ПК
-                            result[key] = dep.getPrimaryKey();
+                            if (recursively) {
+                                result[key] = dep.toArray();
+                            } else {
+                                result[key] = dep.getPrimaryKey();
+                            }
                         } else if (dep instanceof DateTime) {
                             result[key] = dep.format("%c");
                         };
