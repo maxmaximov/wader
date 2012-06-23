@@ -95,9 +95,11 @@
             },
 
             save: function() {
-                var promise = new $.Deferred();
-                this._push(promise);
-                return promise;
+                if (!this.isExist() || !this.isDeleted()) {
+                    var promise = new $.Deferred();
+                    this._push(promise);
+                    return promise;
+                }
             },
 
             load: function() {
