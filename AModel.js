@@ -96,6 +96,9 @@
             },
 
             save: function() {
+                if (this.isExist() || this.isDeleted()) {
+                    return;
+                }
                 var promise = new $.Deferred();
                 this._push(promise);
                 return promise;
@@ -190,7 +193,6 @@
 
                 this._onSave(promise, data);
 
-                this._collection.refresh();
                 this._collection.refresh2(this);
             },
 
@@ -279,7 +281,7 @@
                 }
             },
 
-            toArray: function(){
+            toArray: function(recursively){
                 var result = {
                     "model_id": this.getModelId(),
                     "_created_at": this.getCreatedAt(),
@@ -295,7 +297,11 @@
                         var dep = this._attribute[key];
                         if (dep instanceof wader.AModel) {
                             //сериализуем сущность в ссылку на ПК
-                            result[key] = dep.getPrimaryKey();
+                            if (recursively) {
+                                result[key] = dep.toArray();
+                            } else {
+                                result[key] = dep.getPrimaryKey();
+                            }
                         } else if (dep instanceof DateTime) {
                             result[key] = dep.format("%c");
                         };
