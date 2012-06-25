@@ -95,11 +95,12 @@
             },
 
             save: function() {
-                if (!this.isExist() || !this.isDeleted()) {
-                    var promise = new $.Deferred();
-                    this._push(promise);
-                    return promise;
+                if (this.isExist() || this.isDeleted()) {
+                    return;
                 }
+                var promise = new $.Deferred();
+                this._push(promise);
+                return promise;
             },
 
             load: function() {
@@ -191,7 +192,6 @@
 
                 this._onSave(promise, data);
 
-                this._collection.refresh();
                 this._collection.refresh2(this);
             },
 
