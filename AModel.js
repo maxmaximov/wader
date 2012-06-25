@@ -57,6 +57,7 @@
                     5: []
                 };
                 this._silent = false;
+                this._virtual = false;
             },
 
             construct: function() {
@@ -356,6 +357,10 @@
                 return this._silent;
             },
 
+            isVirtual: function () {
+                return this._virtual;
+            },
+
             isNew: function() {
                 return this.getState() === wader.AModel.NULL;
             },
@@ -415,7 +420,7 @@
             },
 
             validate: function() {
-                Logger.warn("В модели " + this.constructor.fullName + " не определен метод validate");
+                //Logger.warn("В модели " + this.constructor.fullName + " не определен метод validate");
                 return true;
             },
 

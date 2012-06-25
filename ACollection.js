@@ -70,7 +70,6 @@
         },
 
         refresh2: function (item) {
-            this._notifyObservers();
             this._notifyObservers2("update", item);
         },
 
@@ -86,7 +85,7 @@
             var items = [];
 
             for (var i = 0, l = this._items.length; i < l; i++) {
-                if (this._items[i] && !this._items[i].isDeleted() && !this._items[i].isDisabled()) {
+                if (this._items[i] && !this._items[i].isNew() && !this._items[i].isDeleted() && !this._items[i].isDisabled() && !this._items[i].isVirtual()) {
                     items.push(this._items[i]);
                 }
             }
@@ -98,7 +97,7 @@
             var items = [];
 
             for (var i = 0, l = this._items.length; i < l; i++) {
-                if (this._items[i] && this._items[i].getState() !== wader.AModel.DELETED && this._items[i].getState() !== wader.AModel.NULL) {
+                if (this._items[i] && !this._items[i].isNew() && !this._items[i].isDeleted() && !this._items[i].isVirtual()) {
                     items.push(this._items[i]);
                 }
             }
