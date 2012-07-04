@@ -88,19 +88,38 @@
             },
 
             remove: function() {
+                var promise = new $.Deferred();
+
                 if (!this.isCreated() && !this.isDeleted()) {
-                    this._dp.remove(this.getPrimaryKey());
-                };
+                    $.when(this._dp.remove(this.getPrimaryKey()))
+                        .done(this.proxy("onRemoveDone", promise))
+                        .fail(this.proxy("onRemoveFail", promise));
+                } else {
+                    this.onRemoveDone(promise);
+                }
+                return promise;
+            },
+
+            onRemoveDone: function(promise) {
                 this._collection.remove(this);
                 this.setState(wader.AModel.DELETED);
+                promise.resolve()
+            },
+
+            onRemoveFail: function(promise) {
+                promise.fail();
             },
 
             save: function() {
-                if (this.isExist() || this.isDeleted()) {
-                    return;
-                }
                 var promise = new $.Deferred();
-                this._push(promise);
+                if (!(this.isExist() || this.isDeleted())) {
+                    var arr = this.toArray()
+                    var request = this.isCreated() ? this._dp.set("", arr) : this._dp.update(this.getPrimaryKey(), arr);
+                    request.done(this.proxy("_onSaveDone", promise));
+                    request.fail(this.proxy("_onSaveFail", promise));
+                } else {
+                    this._onSaveDone(promise);
+                }
                 return promise;
             },
 
@@ -123,7 +142,7 @@
 
                 for (var i = 0, l = this._observers[event].length; i < l; i++) {
                     if (this._observers[event][i] === callback) {
-                        this._observers[event].splice(i, 1);
+                        this._observers[event][i] = null;
                         break;
                     }
                 }
@@ -141,10 +160,11 @@
                     this._attribute[key] = value;
 
                     if (!this.isSilent()) {
-                        var that = this;
                         this._observers[5].forEach(function(callback) {
-                            callback(that);
-                        })
+                            if (callback) {
+                                callback(this);
+                            };
+                        }, this);
                     }
 
                     if (this.isCreated()) {
@@ -158,47 +178,35 @@
                 return this;
             },
 
-            _push: function(promise) {
-                //отправить экземпляр на сервер
-                var arr = this.toArray()
-                var request = this.isCreated() ? this._dp.set("", arr) : this._dp.update(this.getPrimaryKey(), arr);
-                request.done(this.proxy("_onPushDone", promise));
-                request.fail(this.proxy("_onPushFail", promise));
-            },
-
             _pull: function() {
-                //получить последнюю сохраненную версию с сервера и перезаписать ею экземпляр
                 var promise = new $.Deferred();
                 $.when(this._dp.get(this.getPrimaryKey()))
                     .done(this.proxy("_onPullDone", promise))
                     .fail(this.proxy("_onPullFail", promise));
             },
 
-            _onPullDone: function(data) {
+            _onPullDone: function(promise, data) {
+                this.setSilentOn();
+                this.fromArray(data);
+                this.setSilentOff();
+                this.touch();
                 this._updatedAt = new DateTime();
                 this.setState(wader.AModel.EXIST);
+                this._collection.refresh2();
+                promise.resolve();
             },
 
             _onPullFail: function(data) {
                 throw new Error("pull fail");
             },
 
-            _onPushDone: function(promise, data) {
-                /*if (this.isCreated()) {
-                    this._collection.add(this);
-                this._collection.refresh();
-                };*/
-
-                //this.setState(wader.AModel.EXIST);
-
+            _onSaveDone: function(promise, data) {
                 this._onSave(promise, data);
-
                 this._collection.refresh2(this);
             },
 
-            _onPushFail: function(promise, data) {
+            _onSaveFail: function(promise, data) {
                 promise.reject();
-                //throw new Error("push fail");
             },
 
             _validate: function() {
@@ -298,8 +306,9 @@
                         if (dep instanceof wader.AModel) {
                             //сериализуем сущность в ссылку на ПК
                             if (recursively) {
-                                result[key] = dep.toArray();
+                                result[key] = dep.toArray(true);
                             } else {
+                                // или рекурсивно во вложенный массив
                                 result[key] = dep.getPrimaryKey();
                             }
                         } else if (dep instanceof DateTime) {
@@ -311,11 +320,12 @@
             },
 
             setState: function (state) {
-                var that = this;
                 this._state = state;
                 this._observers[state].forEach(function(callback) {
-                    callback(that);
-                });
+                    if (callback) {
+                        callback(this);
+                    };
+                }, this);
             },
 
             getState: function (state) {
@@ -350,7 +360,7 @@
 
             reset: function() {
                 //сбросить на последнее сохраненное состояние
-                if (this.isModified()) {
+                if (this.isUpdated()) {
                     this._pull();
                 };
             },
@@ -446,10 +456,11 @@
             },
 
             touch: function() {
-                var that = this;
                 this._observers[5].forEach(function(callback) {
-                    callback(that);
-                })
+                    if (callback) {
+                        callback(this);
+                    };
+                }, this);
             },
 
             toString: function() {
