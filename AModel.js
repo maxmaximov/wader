@@ -154,6 +154,13 @@
                 }
                 return this._attribute[key];
             },
+            
+            removeProp: function(key) {
+                if (!(key in this._attributes)) {
+                    throw new Error("Не знаю ничего про свойство " + key + " атрибута модели " + this.constructor.fullName);
+                }
+                return this._attribute[key] = undefined;
+            },
 
             _set: function(key, value) {
                 if (this._attribute[key] != value) {
