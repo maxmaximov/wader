@@ -164,7 +164,17 @@
 
             _set: function(key, value) {
                 if (this._attribute[key] != value) {
-                    this._attribute[key] = value;
+                    if (this._attributes[key]["type"] == "list") {
+                        if (typeof this._attribute[key] == "undefined") {
+                            this._attribute[key] = [];
+                        };
+                        if (this._attribute[key].indexOf(value) == -1) {
+                            this._attribute[key].push(value);
+                        };
+                    } else {
+                        this._attribute[key] = value;
+                    }
+
 
                     if (!this.isSilent()) {
                         this._observers[5].forEach(function(callback) {
@@ -248,6 +258,21 @@
                             };
                             continue;
                         };
+                        if (type == "list") {
+                            // Java-like List (array of objects)
+                            var objectClass = this._attributes[idx]["objectClass"];
+                            var arr = value.map(function(item) {
+                                if (item instanceof objectClass && item.isValid()) {
+                                    return item;
+                                } else {
+                                    errors[idx] = {
+                                        "message": "некорректный элемент списка",
+                                        "input": value
+                                    };
+                                }
+                            })
+                            continue;
+                        };
                         if (typeof type === "object" || typeof type === "function") {
                             if (!value instanceof type) {
                                 errors[idx] = {
@@ -320,7 +345,17 @@
                             }
                         } else if (dep instanceof DateTime) {
                             result[key] = dep.format("%c");
-                        };
+                        } else if ($.isArray(dep)) {
+                            if (recursively) {
+                                result[key] = dep.map(function(item){
+                                    return item.toArray(recursively);
+                                });
+                            } else {
+                                result[key] = dep.map(function(item){
+                                    return item.getPrimaryKey();
+                                });
+                            }
+                        }
                     }
                 }
                 return result;
