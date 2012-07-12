@@ -91,9 +91,13 @@
                 var promise = new $.Deferred();
 
                 if (!this.isCreated() && !this.isDeleted()) {
-                    $.when(this._dp.remove(this.getPrimaryKey()))
-                        .done(this.proxy("onRemoveDone", promise))
-                        .fail(this.proxy("onRemoveFail", promise));
+                    if (this._parent) {
+                        this.onRemoveDone(promise);
+                    } else {
+                        $.when(this._dp.remove(this.getPrimaryKey()))
+                            .done(this.proxy("onRemoveDone", promise))
+                            .fail(this.proxy("onRemoveFail", promise));
+                    }
                 } else {
                     this.onRemoveDone(promise);
                 }
