@@ -348,7 +348,7 @@
                                 result[key] = dep.getPrimaryKey();
                             }
                         } else if (dep instanceof DateTime) {
-                            result[key] = dep.format("%c");
+                            result[key] = dep.toISOString();
                         } else if ($.isArray(dep)) {
                             if (recursively) {
                                 result[key] = dep.map(function(item){
