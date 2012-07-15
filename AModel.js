@@ -317,11 +317,13 @@
                 for (var field in data) {
                     var setterName = "set" + field.charAt(0).toUpperCase() + field.substr(1, field.length-1),
                         value = data[field];
-                    if (field in this._attributes) {
-                        this[setterName](value);
-                    } else {
-                        Logger.info(this, field);
-                    }
+                    if (value !== null) {
+                        if (field in this._attributes) {
+                            this[setterName](value);
+                        } else {
+                            Logger.info(this, field);
+                        }
+                    };
                 }
             },
 
