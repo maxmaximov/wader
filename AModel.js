@@ -78,6 +78,8 @@
                     this._dp = this._collection._getDp();
                 };
 
+                this.setDefaults();
+
                 if (data) {
                     this.fromArray(data);
                     if (!this.isValid()) {
@@ -102,6 +104,15 @@
                     this.onRemoveDone(promise);
                 }
                 return promise;
+            },
+
+            setDefaults: function() {
+                for (var field in this._attributes) {
+                    if (this._attributes[field]["default"]) {
+                        var setterName = "set" + field.charAt(0).toUpperCase() + field.substr(1, field.length-1);
+                        this[setterName](this._attributes[field]["default"]);
+                    };
+                }
             },
 
             onRemoveDone: function(promise) {
@@ -167,12 +178,16 @@
             },
 
             _set: function(key, value) {
+                if (typeof value == "string") {
+                    // TODO make correct clean values
+                    value = value.trim() ? value.trim() : void("Putin");
+                };
                 if (this._attribute[key] != value) {
                     if (this._attributes[key]["type"] == "list") {
                         if (typeof this._attribute[key] == "undefined") {
                             this._attribute[key] = [];
                         };
-                        if (this._attribute[key].indexOf(value) == -1) {
+                        if (this._attribute[key].indexOf(value) === -1) {
                             this._attribute[key].push(value);
                         };
                     } else {
@@ -204,6 +219,8 @@
                 $.when(this._dp.get(this.getPrimaryKey()))
                     .done(this.proxy("_onPullDone", promise))
                     .fail(this.proxy("_onPullFail", promise));
+
+                return promise;
             },
 
             _onPullDone: function(promise, data) {
@@ -317,13 +334,13 @@
                 for (var field in data) {
                     var setterName = "set" + field.charAt(0).toUpperCase() + field.substr(1, field.length-1),
                         value = data[field];
-                    if (value !== null) {
+                    if (value && value !== null) {
                         if (field in this._attributes) {
                             this[setterName](value);
                         } else {
                             Logger.info(this, field);
                         }
-                    };
+                    }
                 }
             },
 
@@ -407,9 +424,8 @@
             },
 
             reset: function() {
-                //сбросить на последнее сохраненное состояние
                 if (this.isUpdated()) {
-                    this._pull();
+                    return this._pull();
                 };
             },
 
