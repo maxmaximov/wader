@@ -59,16 +59,16 @@
 			switch (method) {
 				case "get":
 					if (key) {
-						url += key;
+						url += key + "/";
 					};
 					return this._handleResult(url, method);
 				case "post":
 					return this._handleResult(url, method, JSON.stringify(value));
 				case "put":
-					url += key;
+					url += key + "/";
 					return this._handleResult(url, method, JSON.stringify(value));
 				case "delete":
-					url += key;
+					url += key + "/";
 					return this._handleResult(url, method);
 				case "getMulti":
 					url += this._buildQueryParams(key);
