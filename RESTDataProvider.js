@@ -56,6 +56,7 @@
 		_makeRequest: function(method, key, value) {
 			var url = this.baseUrl + this.resource + "/",
 				data = {};
+
 			switch (method) {
 				case "get":
 					if (key) {
@@ -63,9 +64,16 @@
 					};
 					return this._handleResult(url, method);
 				case "post":
+					delete value["disabled"];
+					delete value["_created_at"];
+					delete value["model_id"];
 					return this._handleResult(url, method, JSON.stringify(value));
 				case "put":
 					url += key + "/";
+					delete value["disabled"];
+					delete value["_created_at"];
+					delete value["model_id"];
+					delete value["uid"];
 					return this._handleResult(url, method, JSON.stringify(value));
 				case "delete":
 					url += key + "/";
