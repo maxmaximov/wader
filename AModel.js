@@ -266,7 +266,6 @@
                         var rawString = Object.prototype.toString.call(value).slice(8, -1);
 
                         if (!type) {
-                            debugger;
                             throw new Error("Incorrect Type");
                         }
                         if (type == "enum") {
