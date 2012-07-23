@@ -24,6 +24,7 @@
 		containerSelector: null,
 		container: null,
 		template: null,
+		templatePath: null,
 		templateParams: {},
 		callbacks: {},
 		templateEngine: null,
@@ -35,7 +36,7 @@
 			/*
 			* временное решение подгрузки шаблона
 			*/
-			require(["/fest/" + this.template + ".js"], function(template){
+			require([this.templatePath], function(template){
 				that.templateParams = params.templateParams;
 				that.callbacks.open = params.open || new Function();
 				that.callbacks.done = params.done || new Function();
