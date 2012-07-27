@@ -1,7 +1,7 @@
 (function(ns) {
 	"use strict";
 
-	ADataProvider.extend("wader.RESTDataProvider", {
+	ADataProvider.extend("wader.RESTDataProvider", {}, {
 		/* @Private */
 		init: function(resource, baseUrl) {
 			this.resource = resource;
@@ -83,12 +83,30 @@
 					return this._handleResult(url, "get");
 			}
 		},
+		_handleError: function(xhr, status, error) {
+			switch (xhr.status) {
+				case 0:
+					ADataProvider.handleError("error", "Произошла ошибка при соединении с сервером, проверьте соединение с сетью и ");
+					break;
+				case 401:
+					ADataProvider.handleError("error", "Возникла проблема при авторизации пользователя &mdash; мы вас не узнаём. Для входа в систему ");
+					break;
+				case 400:
+					ADataProvider.handleError("critical", "Произошла ошибка при соединении с сервером - ведутся временные технические работы. Пожалуйста, ");
+					break;
+				case 502:
+					ADataProvider.handleError("critical", "Произошла ошибка при соединении с сервером - ведутся временные технические работы. Пожалуйста, ");
+					break;
+			}
+		},
 		_handleResult: function(url, method, data) {
 			return $.ajax({
 				url: url,
+				timeout: 30000,
 				data: data,
 				type: method,
 				dataType: "json",
+				error: this.proxy("_handleError"),
 				contentType: "application/json; charset=utf-8"
 			});
 		}

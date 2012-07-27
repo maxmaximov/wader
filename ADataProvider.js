@@ -14,6 +14,23 @@
 
 	/* @Static */
 	{
+		errorHandlers: {
+			"critical": [],
+			"error": [],
+			"notice": []
+		},
+		addErrorHandler: function(level, callback) {
+			if (level in this.errorHandlers) {
+				this.errorHandlers[level].push(callback);
+			};
+		},
+		handleError: function(level, data){
+			if (level in this.errorHandlers) {
+				this.errorHandlers[level].forEach(function(cb) {
+					cb(data);
+				});
+			};
+		}
 	},
 
 	/* @Prototype */
