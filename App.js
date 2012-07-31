@@ -24,9 +24,9 @@
         _questions: [],
         _answers: {},
 
-        getInstance: function (options) {
+        getInstance: function () {
             if (!wader.App._instance) {
-                wader.App._instance = new wader.App(options);
+                wader.App._instance = new wader.App();
                 wader.App._timestamp = new Date();
             }
 
@@ -166,13 +166,6 @@
 
             Logger.log(this, "init");
 
-            // Binding route rules to modules
-            $.each(this.options.routes, function (moduleName, routes) {
-                $.each(routes, function (i, routeRule) {
-                    Router.add(routeRule, moduleName);
-                });
-            });
-
             var history = window.History, url = history.getState().url;
 
             if (window.location.toString().search(/#/) && !history.isTraditionalAnchor(history.getHash())) {
@@ -187,6 +180,15 @@
             }
 
             Hub.sub("wader/module/ready", this.proxy("_onReadyModule"));
+        },
+
+        setRoute: function(routes) {
+            // Binding route rules to modules
+            $.each(routes, function (moduleName, routes) {
+                $.each(routes, function (i, routeRule) {
+                    Router.add(routeRule, moduleName);
+                });
+            });
         },
 
         run: function () {
@@ -214,7 +216,8 @@
 
             // Run matched modules
             for (var className in matches) {
-                require([this._getModuleNameByClass(className)], this.proxy("_onLoadModule", className, matches[className]));
+                //require([this._getModuleNameByClass(className)], this.proxy("_onLoadModule", className, matches[className]));
+                this._onLoadModule(className, matches[className]);
             }
         },
 
@@ -243,7 +246,7 @@
 
                     Logger.log(this, className + " module registered");
                 } else {
-                    throw new Error("[wader.App] can not create instance of class \"" + className + " requested by path \"" + this._getModuleNameByClass(className) + "\"");
+                    throw new Error("[wader.App] can not create instance of class \"" + className + "\" requested by path \"" + this._getModuleNameByClass(className) + "\"");
                 }
             }
 

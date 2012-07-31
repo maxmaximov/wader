@@ -36,18 +36,16 @@
 			/*
 			* временное решение подгрузки шаблона
 			*/
-			require([this.templatePath], function(template){
-				that.templateParams = params.templateParams;
-				that.callbacks.open = params.open || new Function();
-				that.callbacks.done = params.done || new Function();
-				that.callbacks.select = params.select || new Function();
-				that.callbacks.close = params.close || new Function();
-				that.container = $(params.containerSelector);
-				if (params.showImmediately) {
-					that.render();
-				};
-				that._params = params;
-			})
+			that.templateParams = params.templateParams;
+			that.callbacks.open = params.open || new Function();
+			that.callbacks.done = params.done || new Function();
+			that.callbacks.select = params.select || new Function();
+			that.callbacks.close = params.close || new Function();
+			that.container = $(params.containerSelector);
+			if (params.showImmediately) {
+				that.render();
+			};
+			that._params = params;
 		},
 		/*
 		* Кастомный конструктор
