@@ -61,6 +61,28 @@
             return this._promise;
         },
 
+        _onPrepare: function (data) {
+            var items = [];
+            var item;
+
+            for (var i = 0, l = data.objects.length; i < l; i++) {
+                try {
+                    item = new this._itemClass(data.objects[i]);
+                } catch (e) {
+                    Raven.captureException(e);
+                    Logger.warn(this, e);
+                    continue;
+                }
+
+                items.push(item);
+            }
+
+            this._items = items;
+            this._prepared = true;
+
+            this._promise.resolve(items);
+        },
+
         _getDp: function () {
             return this._dp;
         },

@@ -83,7 +83,7 @@
                 if (data) {
                     this.fromArray(data);
                     if (!this.isValid()) {
-                        throw new Error(JSON.stringify(data));
+                        throw new Error("invalid data in \"" + this.constructor.fullName + "\"" + JSON.stringify(data).replace("@", "[at]"));
                     }
                     this.setState(wader.AModel.EXIST);
                 };
