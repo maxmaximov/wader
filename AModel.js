@@ -177,6 +177,34 @@
                 return this._attribute[key] = undefined;
             },
 
+            filterPropFromList: function(key, value) {
+                if (!(key in this._attributes)) {
+                    throw new Error("Не знаю ничего про свойство " + key + " атрибута модели " + this.constructor.fullName);
+                };
+                this._attribute[key] = this._attribute[key].filter(function(item){
+                    if (item !== value) {
+                        return item;
+                    };
+                });
+
+                if (!this.isSilent()) {
+                    this._observers[5].forEach(function(callback) {
+                        if (callback) {
+                            callback(this);
+                        };
+                    }, this);
+                }
+
+                if (this.isCreated()) {
+                } else if (this.isNew()) {
+                    this.setState(wader.AModel.CREATED);
+                } else {
+                    this.setState(wader.AModel.UPDATED);
+                }
+
+                return this;
+            },
+
             _set: function(key, value) {
                 if (typeof value == "string") {
                     // TODO make correct clean values
