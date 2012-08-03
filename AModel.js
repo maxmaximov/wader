@@ -206,10 +206,10 @@
             },
 
             _set: function(key, value) {
-                if (typeof value == "string") {
+                /*if (typeof value == "string") {
                     // TODO make correct clean values
                     value = value.trim() ? value.trim() : void("Putin");
-                };
+                };*/
                 if (this._attribute[key] != value) {
                     if (this._attributes[key]["type"] == "list") {
                         if (typeof this._attribute[key] == "undefined") {
