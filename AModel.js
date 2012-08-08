@@ -37,6 +37,7 @@
         /* @Prototype */
         {
             setup: function () {
+
                 this._attribute = {};
                 this._createdAt = undefined;
                 this._updatedAt = undefined;
@@ -72,13 +73,14 @@
 
                 this.construct();
 
-                this.setState(wader.AModel.NULL);
 
                 if (this._collection) {
                     this._dp = this._collection._getDp();
                 };
 
                 this.setDefaults();
+
+                this.setState(wader.AModel.NULL);
 
                 if (data) {
                     this.fromArray(data);
@@ -112,7 +114,7 @@
                         var setterName = "set" + field.charAt(0).toUpperCase() + field.substr(1, field.length-1);
                         this[setterName](this._attributes[field]["default"]);
                     };
-                }
+                };
             },
 
             onRemoveDone: function(promise) {
@@ -173,8 +175,15 @@
             removeProp: function(key) {
                 if (!(key in this._attributes)) {
                     throw new Error("Не знаю ничего про свойство " + key + " атрибута модели " + this.constructor.fullName);
-                }
-                return this._attribute[key] = undefined;
+                };
+                this._attribute[key] = undefined;
+                if (!this.isSilent()) {
+                    this._observers[5].forEach(function(callback) {
+                        if (callback) {
+                            callback(this);
+                        };
+                    }, this);
+                };
             },
 
             filterPropFromList: function(key, value) {
@@ -232,6 +241,7 @@
                     }
 
                     if (this.isCreated()) {
+
                     } else if (this.isNew()) {
                         this.setState(wader.AModel.CREATED);
                     } else {
