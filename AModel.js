@@ -244,8 +244,9 @@
                             };
                         }, this);
                     }
-
-                    if (this.isNew()) {
+                    if (this.isCreated()) {
+                        
+                    } else if (this.isNew()) {
                         this.setState(wader.AModel.CREATED);
                     } else {
                         this.setState(wader.AModel.UPDATED);
