@@ -177,6 +177,11 @@
                     throw new Error("Не знаю ничего про свойство " + key + " атрибута модели " + this.constructor.fullName);
                 };
                 this._attribute[key] = undefined;
+                if (this.isNew()) {
+                    this.setState(wader.AModel.CREATED);
+                } else {
+                    this.setState(wader.AModel.UPDATED);
+                }
                 if (!this.isSilent()) {
                     this._observers[5].forEach(function(callback) {
                         if (callback) {
@@ -240,9 +245,7 @@
                         }, this);
                     }
 
-                    if (this.isCreated()) {
-
-                    } else if (this.isNew()) {
+                    if (this.isNew()) {
                         this.setState(wader.AModel.CREATED);
                     } else {
                         this.setState(wader.AModel.UPDATED);
