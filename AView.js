@@ -113,13 +113,18 @@
                 this.detach();
             },
 
-            attach: function() {
+            attach: function(container) {
             },
 
-            render: function() {
+            render: function(container) {
             },
 
             _render: function() {
+            },
+
+            restore: function(container) {
+                this._container = container;
+                this.attach();
             }
         });
     if (ns !== wader) {
