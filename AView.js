@@ -105,12 +105,12 @@
             detach: function() {
                 if (this._node) {
                     this._node.remove();
-                    this._node = void("Navalny");
                 }
             },
 
             unrender: function() {
                 this.detach();
+                this._node = void("Navalny");
             },
 
             attach: function(container) {

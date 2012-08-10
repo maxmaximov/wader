@@ -17,7 +17,7 @@
         /* @Prototype */
         {
             setup: function (model, container) {
-                this._super();
+                this._super(model, container);
                 this.__onEscape = this.proxy("_onEscape");
             },
 
