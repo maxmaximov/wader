@@ -4,7 +4,7 @@
  * @author Max Maximov <max.maximov@gmail.com>
  * @version 0.3
  */
-(function(ns) {
+(function (ns) {
     "use strict";
 
     /*
@@ -39,7 +39,7 @@
                 //this._model.onUpdate(this.__onUpdate);
             },
 
-            _addObserver: function(event, callback) {
+            _addObserver: function (event, callback) {
                 if (!event in this._observers) {
                     throw new Error("Unknown event: " + event);
                 }
@@ -47,7 +47,7 @@
                 this._observers[event].push(callback);
             },
 
-            _removeObserver: function(event, callback) {
+            _removeObserver: function (event, callback) {
                 if (!event in this._observers) {
                     throw new Error("Unknown event: " + event);
                 };
@@ -60,7 +60,7 @@
                 }
             },
 
-            _notifyObservers: function(event) {
+            _notifyObservers: function (event) {
                 if (!event in this._observers) {
                     throw new Error("Unknown event: " + event);
                 }
@@ -70,24 +70,24 @@
                 }
             },
 
-            onDestroy: function(callback) {
+            onDestroy: function (callback) {
                 return this._addObserver("destroy", callback);
             },
 
-            onDrag: function(callback) {
+            onDrag: function (callback) {
                 return this._addObserver("drag", callback);
             },
 
-            _onDelete: function() {
+            _onDelete: function () {
                 this.destroy();
             },
 
-            _onModify: function() {
+            _onModify: function () {
                 this.unrender();
                 this.render();
             },
 
-            destroy: function() {
+            destroy: function () {
                 if (this._model) {
                     //this._model._removeObserver(3, this.__onUpdate);
                     this._model._removeObserver(4, this.__onDelete);
@@ -102,28 +102,32 @@
                 this._notifyObservers("destroy");
             },
 
-            detach: function() {
+            detach: function () {
                 if (this._node) {
                     this._node.remove();
                 }
             },
 
-            unrender: function() {
+            unrender: function () {
                 this.detach();
                 this._node = void("Navalny");
             },
 
-            attach: function(container) {
+            attach: function (container) {
+                if (container) this._container = container;
+                this._container.append(this._node);
             },
 
-            render: function(container) {
+            render: function (container) {
+                if (container) this._container = container;
             },
 
-            _render: function() {
+            _render: function () {
+                this.attach();
             },
 
-            restore: function(container) {
-                this._container = container;
+            restore: function (container) {
+                if (container) this._container = container;
                 this.attach();
             }
         });
