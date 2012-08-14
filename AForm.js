@@ -35,9 +35,9 @@
             },
 
             close: function () {
-                if (this._model.isCreated()) {
+                /*if (this._model.isCreated()) {
                     this._model.remove();
-                }
+                }*/
 
                 this.destroy();
             },
