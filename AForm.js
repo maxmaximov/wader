@@ -19,6 +19,7 @@
             setup: function (model, container) {
                 this._super(model, container);
                 this._controls = [];
+                this._dependencies = {};
                 this._form = void("Navalny");
                 this.__onEscape = this._onEscape.bind(this);
             },
@@ -51,8 +52,9 @@
                     var label = item["label"];
                     var data = item["data"];
                     var container = this._form.find(item["selector"]);
+                    var callback = item["callback"];
 
-                    item["instance"] = new item["class"](label, data, container);
+                    item["instance"] = new item["class"](label, data, container, callback);
                     item["instance"].render();
                 }, this);
 
@@ -85,6 +87,12 @@
             },
 
             _onFail: function (response) {
+            },
+
+            _onModify: function (key, value) {
+                if (this._dependencies[key]) {
+                    this._dependencies[key](value);
+                }
             }
         });
     if (ns !== wader) {
