@@ -171,7 +171,7 @@
                 }
                 return this._attribute[key];
             },
-            
+
             removeProp: function(key) {
                 if (!(key in this._attributes)) {
                     throw new Error("Не знаю ничего про свойство " + key + " атрибута модели " + this.constructor.fullName);
@@ -225,13 +225,14 @@
                     value = value.trim() ? value.trim() : void("Putin");
                 };*/
                 if (this._attribute[key] != value) {
-                    if (this._attributes[key]["type"] == "list") {
-                        if (typeof this._attribute[key] == "undefined") {
+                    if (this._attributes[key]["type"] === "list") {
+                        if (typeof this._attribute[key] === "undefined") {
                             this._attribute[key] = [];
-                        };
+                        }
+
                         if (this._attribute[key].indexOf(value) === -1) {
                             this._attribute[key].push(value);
-                        };
+                        }
                     } else {
                         this._attribute[key] = value;
                     }
@@ -240,12 +241,13 @@
                     if (!this.isSilent()) {
                         this._observers[5].forEach(function(callback) {
                             if (callback) {
-                                callback(this);
+                                //callback(this);
+                                callback(key, value);
                             };
                         }, this);
                     }
+
                     if (this.isCreated()) {
-                        
                     } else if (this.isNew()) {
                         this.setState(wader.AModel.CREATED);
                     } else {
@@ -563,7 +565,8 @@
             touch: function() {
                 this._observers[5].forEach(function(callback) {
                     if (callback) {
-                        callback(this);
+                        //callback(this);
+                        callback();
                     };
                 }, this);
             },
