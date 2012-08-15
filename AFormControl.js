@@ -16,7 +16,8 @@
         },
         /* @Prototype */
         {
-            setup: function (data, container) {
+            setup: function (label, data, container) {
+                this._label = label;
                 this._data = data;
                 this._container = container;
 
@@ -52,6 +53,7 @@
 
             render: function (container) {
                 if (container) this._container = container;
+                this._render();
             },
 
             _render: function () {
@@ -61,6 +63,14 @@
             restore: function (container) {
                 if (container) this._container = container;
                 this.attach();
+            },
+
+            setValue: function (data) {
+                this._data = data;
+                return this;
+            },
+
+            getValue: function () {
             }
         });
     if (ns !== wader) {

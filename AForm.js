@@ -18,6 +18,7 @@
         {
             setup: function (model, container) {
                 this._super(model, container);
+                this._controls = [];
                 this._form = void("Navalny");
                 this.__onEscape = this._onEscape.bind(this);
             },
@@ -45,6 +46,16 @@
             _render: function () {
                 this._form = this._node.find("form");
                 $(document).bind("keyup", this.__onEscape);
+
+                this._controls.forEach(function (item) {
+                    var label = item["label"];
+                    var data = item["data"];
+                    var container = this._form.find(item["selector"]);
+
+                    item["instance"] = new item["class"](label, data, container);
+                    item["instance"].render();
+                }, this);
+
                 this._super();
             },
 
