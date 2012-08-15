@@ -16,10 +16,11 @@
         },
         /* @Prototype */
         {
-            setup: function (label, data, container) {
+            setup: function (label, data, container, callback) {
                 this._label = label;
                 this._data = data;
                 this._container = container;
+                this._callback = callback;
 
                 this._models = App.getInstance().models;
 
@@ -71,6 +72,10 @@
             },
 
             getValue: function () {
+            },
+
+            callback: function () {
+                this._callback(this.getValue());
             }
         });
     if (ns !== wader) {
