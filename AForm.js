@@ -61,6 +61,14 @@
                 this._super();
             },
 
+            restore: function (container) {
+                this._super(container);
+
+                this._controls.forEach(function (item) {
+                    item["instance"].restore();
+                }.bind(this));
+            },
+
             _onReset: function (e) {
                 this.close();
             },
