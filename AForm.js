@@ -37,11 +37,13 @@
             },
 
             close: function () {
-                if (this._model.isCreated()) {
-                    this._model.remove();
-                } else {
-                    this._model.reset();
-                    this._model._collection.refresh();
+                if (this._model) {
+                    if (this._model.isCreated()) {
+                        this._model.remove();
+                    } else {
+                        this._model.reset();
+                        this._model._collection.refresh();
+                    }
                 }
 
                 this.destroy();
