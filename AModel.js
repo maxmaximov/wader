@@ -196,10 +196,10 @@
                     throw new Error("Не знаю ничего про свойство " + key + " атрибута модели " + this.constructor.fullName);
                 };
                 this._attribute[key] = this._attribute[key].filter(function(item){
-                    if (item !== value) {
+                    if (item[this._relationKey] !== value) {
                         return item;
                     };
-                });
+                }, this);
 
                 if (!this.isSilent()) {
                     this._observers[5].forEach(function(callback) {
@@ -224,15 +224,26 @@
                     // TODO make correct clean values
                     value = value.trim() ? value.trim() : void("Putin");
                 };*/
+
                 if (this._attribute[key] != value) {
                     if (this._attributes[key]["type"] === "list") {
                         if (typeof this._attribute[key] === "undefined") {
                             this._attribute[key] = [];
                         }
 
-                        if (this._attribute[key].indexOf(value) === -1) {
+                        var exist = false;
+
+                        this._attribute[key].forEach(function(item) {
+                            if (item[this._relationKey] == value[this._relationKey]) {
+                                exist = true;
+                                return;
+                            }
+                        }, this);
+
+                        if (!exist) {
                             this._attribute[key].push(value);
-                        }
+                        };
+
                     } else {
                         this._attribute[key] = value;
                     }
@@ -254,7 +265,7 @@
                         this.setState(wader.AModel.UPDATED);
                     }
                 }
-
+                //if (key == "attendees") debugger;
                 return this;
             },
 
@@ -323,18 +334,17 @@
                             continue;
                         };
                         if (type == "list") {
-                            // Java-like List (array of objects)
+                            // array of objects
                             var objectClass = this._attributes[idx]["objectClass"];
-                            var arr = value.map(function(item) {
-                                if (item instanceof objectClass && item.isValid()) {
-                                    return item;
-                                } else {
+                            value.forEach(function(item) {
+                                item = item[this._relationKey];
+                                if (!(item instanceof objectClass) || !item.isValid()) {
                                     errors[idx] = {
                                         "message": "некорректный элемент списка",
                                         "input": value
                                     };
                                 }
-                            })
+                            }, this);
                             continue;
                         };
                         if (typeof type === "object" || typeof type === "function") {
@@ -377,9 +387,25 @@
                 for (var field in data) {
                     var setterName = "set" + field.charAt(0).toUpperCase() + field.substr(1, field.length-1),
                         value = data[field];
+
                     if (value && value !== null) {
                         if (field in this._attributes) {
-                            this[setterName](value);
+                            if (field == "attendees") {
+                                // HAHA! OH WOW!
+                                value.forEach(function(item) {
+                                    var email = item.email,
+                                        access = item.access,
+                                        val = {
+                                            "email": email,
+                                            "access": access
+                                        };
+
+                                    this[setterName](val);
+
+                                }, this);
+                            } else {
+                                this[setterName](value);
+                            }
                         } else {
                             Logger.info(this, field);
                         }
@@ -389,10 +415,12 @@
 
             toArray: function(recursively){
                 var result = {
-                    "model_id": this.getModelId(),
-                    "_created_at": this.getCreatedAt(),
-                    "disabled": this.isDisabled()
-                };
+                        "model_id": this.getModelId(),
+                        "_created_at": this.getCreatedAt(),
+                        "disabled": this.isDisabled()
+                    },
+                    rkey = this._relationKey;
+
                 for (var attr in this._attributes) {
                     var getterName = "get" + attr.charAt(0).toUpperCase() + attr.substr(1, attr.length-1);
                     result[attr] = this[getterName]();
@@ -401,6 +429,7 @@
                 for (var key in result) {
                     if (typeof result[key] == "object") {
                         var dep = this._attribute[key];
+
                         if (dep instanceof wader.AModel) {
                             //сериализуем сущность в ссылку на ПК
                             if (recursively) {
@@ -414,12 +443,19 @@
                         } else if ($.isArray(dep)) {
                             if (recursively) {
                                 result[key] = dep.map(function(item){
-                                    return item.toArray(recursively);
+                                    return item[rkey].toArray(recursively);
                                 });
                             } else {
+                                var hui = this.constructor.fullName;
                                 result[key] = dep.map(function(item){
-                                    return item.getPrimaryKey();
-                                });
+
+                                    var out = $.extend({}, item)
+
+                                    var obj = item[rkey].getPrimaryKey();
+                                    out[rkey] = obj;
+
+                                    return out;
+                                }, this);
                             }
                         }
                     }
