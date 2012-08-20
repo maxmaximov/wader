@@ -224,6 +224,7 @@
                     // TODO make correct clean values
                     value = value.trim() ? value.trim() : void("Putin");
                 };*/
+
                 if (this._attribute[key] != value) {
                     if (this._attributes[key]["type"] === "list") {
                         if (typeof this._attribute[key] === "undefined") {
@@ -264,7 +265,7 @@
                         this.setState(wader.AModel.UPDATED);
                     }
                 }
-
+                //if (key == "attendees") debugger;
                 return this;
             },
 
@@ -445,12 +446,16 @@
                                     return item[rkey].toArray(recursively);
                                 });
                             } else {
+                                var hui = this.constructor.fullName;
                                 result[key] = dep.map(function(item){
-                                    //return item[rkey].getPrimaryKey();
+
+                                    var out = $.extend({}, item)
+
                                     var obj = item[rkey].getPrimaryKey();
-                                    item[rkey] = obj;
-                                    return item;
-                                });
+                                    out[rkey] = obj;
+
+                                    return out;
+                                }, this);
                             }
                         }
                     }
