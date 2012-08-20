@@ -16,8 +16,8 @@
         },
         /* @Prototype */
         {
-            setup: function (model, container) {
-                this._super(model, container);
+            setup: function (model, container, options) {
+                this._super(model, container, options);
                 this._controls = [];
                 this._dependencies = {};
                 this._form = void("Navalny");

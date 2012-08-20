@@ -16,9 +16,10 @@
         },
         /* @Prototype */
         {
-            setup: function (model, container) {
+            setup: function (model, container, options) {
                 this._model = model;
                 this._container = container;
+                this._options = $.extend(this._options, options);
 
                 this._models = App.getInstance().models;
 
