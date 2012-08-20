@@ -421,20 +421,13 @@
 
             toArray: function(recursively){
                 var result = {
-<<<<<<< HEAD
                         "model_id": this.getModelId(),
                         "_created_at": this.getCreatedAt(),
                         "disabled": this.isDisabled()
                     },
                     rkey = this._relationKey;
-=======
-                    "model_id": this.getModelId(),
-                    "_created_at": this.getCreatedAt(),
-                    "disabled": this.isDisabled()
-                };
 
                 this.preToArray();
->>>>>>> 893e159... testing pre -to -from Array
 
                 for (var attr in this._attributes) {
                     var getterName = "get" + attr.charAt(0).toUpperCase() + attr.substr(1, attr.length-1);
