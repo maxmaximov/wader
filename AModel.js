@@ -57,7 +57,7 @@
                     4: [],
                     5: []
                 };
-                this._isExternal = false; // модель создана из внешних данных
+
                 this._silent = false;
                 this._virtual = false;
             },
@@ -84,7 +84,6 @@
                 this.setState(wader.AModel.NULL);
 
                 if (data) {
-                    this._isExternal = true;
                     this.fromArray(data);
                     if (!this.isValid()) {
                         throw new Error("invalid data in \"" + this.constructor.fullName + "\"" + JSON.stringify(data).replace("@", "[at]"));
@@ -381,15 +380,11 @@
                 return this._lastValidationErrors;
             },
 
-            preFromArray: function(data) {},
-            preToArray: function(){},
-
             _parse: function(data) {
                 throw new Error("В модели " + this.constructor.fullName + " не определен метод _parse");
             },
 
             fromArray: function(data){
-                this.preFromArray(data);
                 for (var field in data) {
                     var setterName = "set" + field.charAt(0).toUpperCase() + field.substr(1, field.length-1),
                         value = data[field];
@@ -426,8 +421,6 @@
                         "disabled": this.isDisabled()
                     },
                     rkey = this._relationKey;
-
-                this.preToArray();
 
                 for (var attr in this._attributes) {
                     var getterName = "get" + attr.charAt(0).toUpperCase() + attr.substr(1, attr.length-1);
