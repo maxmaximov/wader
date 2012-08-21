@@ -266,7 +266,7 @@
                         this.setState(wader.AModel.UPDATED);
                     }
                 }
-                //if (key == "attendees") debugger;
+
                 return this;
             },
 
@@ -396,9 +396,11 @@
                                 value.forEach(function(item) {
                                     var email = item.email,
                                         access = item.access,
+                                        owner = item.owner,
                                         val = {
                                             "email": email,
-                                            "access": access
+                                            "access": access,
+                                            "owner": owner,
                                         };
 
                                     this[setterName](val);
