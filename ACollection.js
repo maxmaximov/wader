@@ -61,6 +61,8 @@
             return this._promise;
         },
 
+        _preOnPrepare: function(item) {},
+
         _onPrepare: function (data) {
             var items = [];
             var item;
@@ -68,6 +70,7 @@
             for (var i = 0, l = data.objects.length; i < l; i++) {
                 try {
                     item = new this._itemClass(data.objects[i]);
+                    this._preOnPrepare(item);
                 } catch (e) {
                     Raven.captureException(e);
                     Logger.warn(this, e);
