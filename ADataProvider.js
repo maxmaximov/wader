@@ -5,68 +5,69 @@
  * @version 0.3
  */
 (function(ns) {
-	"use strict";
+    "use strict";
 
-	/*
-	* @abstract wader.ADataProvider
-	*/
-	$.Class.extend("wader.ADataProvider",
+    /*
+    * @abstract wader.ADataProvider
+    */
+    $.Class.extend("wader.ADataProvider",
 
-	/* @Static */
-	{
-		errorHandlers: {
-			"critical": [],
-			"error": [],
-			"notice": []
-		},
-		addErrorHandler: function(level, callback) {
-			if (level in this.errorHandlers) {
-				this.errorHandlers[level].push(callback);
-			};
-		},
-		handleError: function(level, data){
-			if (level in this.errorHandlers) {
-				this.errorHandlers[level].forEach(function(cb) {
-					cb(data);
-				});
-			};
-		}
-	},
+    /* @Static */
+    {
+        errorHandlers: {
+            "critical": [],
+            "error": [],
+            "notice": [],
+            "login": []
+        },
+        addErrorHandler: function(level, callback) {
+            if (level in this.errorHandlers) {
+                this.errorHandlers[level].push(callback);
+            };
+        },
+        handleError: function(level, data){
+            if (level in this.errorHandlers) {
+                this.errorHandlers[level].forEach(function(cb) {
+                    cb(data);
+                });
+            };
+        }
+    },
 
-	/* @Prototype */
-	{
-		/*
-		* @var resourse {String} общий ключ объектов, например, таблица в БД
-		*/
-		resource: null,
-		init: function(resource) {
-			this.resource = resource;
-		},
-		get: function (key) {
-			return this._makeRequest("get", key);
-		},
+    /* @Prototype */
+    {
+        /*
+        * @var resourse {String} общий ключ объектов, например, таблица в БД
+        */
+        resource: null,
+        init: function(resource) {
+            this.resource = resource;
+        },
+        get: function (key) {
+            return this._makeRequest("get", key);
+        },
 
-		set: function (key, value) {
-			return this._makeRequest("post", key, value);
-		},
+        set: function (key, value) {
+            return this._makeRequest("post", key, value);
+        },
 
-		update: function (key, value) {
-			return this._makeRequest("put", key, value);
-		},
+        update: function (key, value) {
+            return this._makeRequest("put", key, value);
+        },
 
-		remove: function (key) {
-			return this._makeRequest("delete", key);
-		},
+        remove: function (key) {
+            return this._makeRequest("delete", key);
+        },
 
-		getMulti: function (filter) {
-			return this._makeRequest("getMulti", filter);
-		},
-		_makeRequest: function(){
-			throw new Error(this.constructor.fullName + ": не реализован метод _makeRequest");
-		}
-	});
+        getMulti: function (filter) {
+            return this._makeRequest("getMulti", filter);
+        },
+        _makeRequest: function(){
+            throw new Error(this.constructor.fullName + ": не реализован метод _makeRequest");
+        }
+    });
 
-	if (ns !== wader) {
-		ns.ADataProvider = wader.ADataProvider;
-	}
+    if (ns !== wader) {
+        ns.ADataProvider = wader.ADataProvider;
+    }
 })(window.WADER_NS || window);

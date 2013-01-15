@@ -19,21 +19,30 @@
             setup: function (model, container, options) {
                 this._super(model, container, options);
                 this._controls = [];
-                this._dependencies = {};
                 this._form = void("Navalny");
-                this.__onEscape = this._onEscape.bind(this);
+                this._lastFocusedField = {};
+                this._escaper = Escaper.getInstance();
             },
 
             unrender: function () {
-                this._super();
+                this._escaper.unsub(this.close);
                 this._form = void("Navalny");
-                $(document).unbind("keyup", this.__onEscape);
+                this._super();
             },
 
             attach: function (container) {
                 this._super(container);
-                this._form.bind("reset", this._onReset.bind(this));
-                this._form.bind("submit", this._onSubmit.bind(this));
+
+                if (!this._form) return;
+
+                this._form.off("reset").on("reset", this._onReset);
+                this._form.off("submit").on("submit", this._onSubmit);
+
+                this._form.find("input, textarea").on("focus", function(e) {
+                    if (document.activeElement && document.activeElement.name) {
+                        this._activeFieldName = document.activeElement.name;
+                    }
+                }.bind(this));
             },
 
             close: function () {
@@ -42,7 +51,6 @@
                         this._model.remove();
                     } else {
                         this._model.reset();
-                        this._model._collection.refresh();
                     }
                 }
 
@@ -51,16 +59,18 @@
 
             _render: function () {
                 this._form = this._node.find("form");
-                $(document).bind("keyup", this.__onEscape);
+                //this._form[0].waderForm = this;
+                this._escaper.sub(this.close);
 
-                this._controls.forEach(function (item) {
-                    var label = item["label"];
-                    var data = item["data"];
-                    var container = this._form.find(item["selector"]);
-                    var callback = item["callback"];
+                this._controls.forEach(function (control) {
+                    var label = control["label"];
+                    var data = control["data"]();
+                    var name = control["name"];
+                    var container = this._form.find(control["selector"]);
+                    var callback = control["callback"];
 
-                    item["instance"] = new item["class"](label, data, container, callback);
-                    item["instance"].render();
+                    control["instance"] = new control["class"](label, data, container, callback, name);
+                    control["instance"].render();
                 }, this);
 
                 this._super();
@@ -68,10 +78,15 @@
 
             restore: function (container) {
                 this._super(container);
-
-                this._controls.forEach(function (item) {
-                    item["instance"].restore();
+                this._controls.forEach(function (control) {
+                    control["instance"].restore();
                 }.bind(this));
+
+                setTimeout(function() {
+                    if (this._form && this._form[0] && this._form[0][this._activeFieldName] && "focus" in this._form[0][this._activeFieldName]) {
+                        $(this._form[0][this._activeFieldName]).focus();
+                    }
+                }.bind(this), 20);
             },
 
             _onReset: function (e) {
@@ -81,14 +96,6 @@
             /*_onCancel: function (e) {
                 this.close();
             },*/
-
-            _onEscape: function (e) {
-                var ESC = 27;
-
-                if (e.keyCode == ESC) {
-                    this.close();
-                }
-            },
 
             _onSubmit: function (e) {
             },
@@ -103,9 +110,13 @@
             },
 
             _onModify: function (key, value) {
-                if (this._dependencies[key]) {
-                    this._dependencies[key](value);
-                }
+                this._controls.forEach(function (control) {
+                    if (~control["dependencies"].indexOf(key)) {
+                        control["instance"].unrender();
+                        control["instance"].setValue(control["data"]());
+                        control["instance"].render();
+                    }
+                });
             }
         });
     if (ns !== wader) {

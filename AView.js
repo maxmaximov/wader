@@ -31,13 +31,9 @@
 
                 this._settingsProvider = App.getInstance().settingsProvider;
 
-                this.__onDelete = this._onDelete.bind(this);
-                this.__onModify = this._onModify.bind(this);
-                //this.__onUpdate = this._onUpdate.bind(this);
-
-                this._model.onDelete(this.__onDelete);
-                this._model.onModify(this.__onModify);
-                //this._model.onUpdate(this.__onUpdate);
+                this._model.onDelete(this._onDelete);
+                this._model.onModify(this._onModify);
+                //this._model.onUpdate(this._onUpdate);
             },
 
             _addObserver: function (event, callback) {
@@ -62,12 +58,14 @@
             },
 
             _notifyObservers: function (event) {
+                var args = Array.prototype.slice.call(arguments, 1);
+
                 if (!event in this._observers) {
                     throw new Error("Unknown event: " + event);
                 }
 
                 for (var i = 0, l = this._observers[event].length; i < l; i++) {
-                    this._observers[event][i]();
+                    this._observers[event][i].apply(this, args);
                 }
             },
 
@@ -90,9 +88,9 @@
 
             destroy: function () {
                 if (this._model) {
-                    //this._model._removeObserver(3, this.__onUpdate);
-                    this._model._removeObserver(4, this.__onDelete);
-                    this._model._removeObserver(5, this.__onModify);
+                    //this._model._removeObserver(3, this._onUpdate);
+                    this._model._removeObserver(4, this._onDelete);
+                    this._model._removeObserver(5, this._onModify);
                 }
 
                 this.unrender();
@@ -115,20 +113,32 @@
             },
 
             attach: function (container) {
-                if (container) this._container = container;
-                this._container.append(this._node);
+                if (container) {
+                    this._container = container;
+                }
+
+                if (this._container) {
+                    this._container.append(this._node);
+                } else {
+                    Logger.warn("Absentee container");
+                }
             },
 
             render: function (container) {
-                if (container) this._container = container;
+                if (container) {
+                    this._container = container;
+                }
             },
 
             _render: function () {
+                this._node[0].waderView = this; // задел на когда-нибудь потом
                 this.attach();
             },
 
             restore: function (container) {
-                if (container) this._container = container;
+                if (container) {
+                    this._container = container;
+                }
                 this.attach();
             }
         });

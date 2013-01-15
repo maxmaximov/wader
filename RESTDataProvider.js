@@ -1,120 +1,146 @@
 (function(ns) {
-	"use strict";
+    "use strict";
 
-	ADataProvider.extend("wader.RESTDataProvider", {}, {
-		/* @Private */
-		init: function(resource, baseUrl) {
-			this.resource = resource;
-			this.baseUrl = baseUrl;
-		},
-		_buildQueryParams: function(data){
-			var value,
-				key,
-				tmp = [],
-				that = this,
-				urlencode = function(str) {
-					str = (str+"").toString();
-					return encodeURIComponent(str).replace(/!/g, "%21").replace(/"/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/\*/g, "%2A").replace(/%20/g, "+");
-				},
-				arg_separator = "&",
-				buildQueryHelper = function (key, val) {
-					var k, tmp = [];
+    ADataProvider.extend("wader.RESTDataProvider", {}, {
+        /* @Private */
+        init: function(resource, baseUrl) {
+            this.resource = resource;
+            this.baseUrl = baseUrl;
+        },
+        _buildQueryParams: function(data) {
+            var value,
+                key,
+                tmp = [],
+                that = this,
+                urlencode = function(str) {
+                    str = (str + "").toString();
+                    return encodeURIComponent(str).replace(/!/g, "%21").replace(/"/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/\*/g, "%2A").replace(/%20/g, "+");
+                },
+                arg_separator = "&",
+                buildQueryHelper = function (key, val) {
+                    var k, tmp = [];
 
-					if (val === true) {
-						val = "1";
-					} else if (val === false) {
-						val = "0";
-					}
-					if (val !== null && typeof(val) === "object") {
-						for (k in val) {
-							if (val[k] !== null) {
-								tmp.push(buildQueryHelper(key + "[" + k + "]", val[k]));
-							}
-						}
-						return tmp.join(arg_separator);
-					} else if (typeof(val) !== "function") {
-						return urlencode(key) + "=" + urlencode(val);
-					} else if (typeof(val) == "function") {
-						return "";
-					} else {
-						throw new Error("Incorrect Parameters");
-					}
-				};
-			if (!data) {
-				return "";
-			};
-			if (typeof data == "string") {
-				return data + "/";
-			}
-			for (key in data) {
-				value = data[key];
-				tmp.push(buildQueryHelper(key, value));
-			}
+                    if (val === true) {
+                        val = "1";
+                    } else if (val === false) {
+                        val = "0";
+                    }
+                    if (val !== null && typeof(val) === "object") {
+                        for (k in val) {
+                            if (val[k] !== null) {
+                                tmp.push(buildQueryHelper(key + "[" + k + "]", val[k]));
+                            }
+                        }
+                        return tmp.join(arg_separator);
+                    } else if (typeof(val) !== "function") {
+                        return urlencode(key) + "=" + urlencode(val);
+                    } else if (typeof(val) == "function") {
+                        return "";
+                    } else {
+                        throw new Error("Incorrect Parameters");
+                    }
+                };
+            if (!data) {
+                return "";
+            };
+            if (typeof data == "string") {
+                return data + "/";
+            };
+            data["email"] = CURRENT_USER.email;
+            for (key in data) {
+                value = data[key];
+                tmp.push(buildQueryHelper(key, value));
+            }
 
-			return "?" + tmp.join(arg_separator);
-		},
-		_makeRequest: function(method, key, value) {
-			var url = this.baseUrl + this.resource + "/",
-				data = {};
+            return "?" + tmp.join(arg_separator);
+        },
+        _makeRequest: function(method, key, value) {
+            var url = this.baseUrl + this.resource + "/",
+                data = {},
+                value = value || {};
 
-			switch (method) {
-				case "get":
-					if (key) {
-						url += key + "/";
-					};
-					return this._handleResult(url, method);
-				case "post":
-					delete value["disabled"];
-					delete value["_created_at"];
-					delete value["model_id"];
-					return this._handleResult(url, method, JSON.stringify(value));
-				case "put":
-					url += key + "/";
-					delete value["disabled"];
-					delete value["_created_at"];
-					delete value["model_id"];
-					delete value["uid"];
-					return this._handleResult(url, method, JSON.stringify(value));
-				case "delete":
-					url += key + "/";
-					return this._handleResult(url, method);
-				case "getMulti":
-					url += this._buildQueryParams(key);
-					return this._handleResult(url, "get");
-			}
-		},
-		_handleError: function(xhr, status, error) {
-			switch (xhr.status) {
-				case 0:
-					ADataProvider.handleError("error", "Произошла ошибка при соединении с сервером, проверьте соединение с сетью и ");
-					break;
-				case 401:
-					ADataProvider.handleError("error", "Возникла проблема при авторизации пользователя — мы вас не узнаём. Для входа в систему ");
-					break;
-				case 400:
-					ADataProvider.handleError("critical", "Произошла ошибка при соединении с сервером — ведутся временные технические работы. Пожалуйста, ");
-					break;
-				case 502:
-					ADataProvider.handleError("critical", "Произошла ошибка при соединении с сервером — ведутся временные технические работы. Пожалуйста, ");
-				case 500:
-					ADataProvider.handleError("critical", "Произошла ошибка при соединении с сервером — ведутся временные технические работы. Пожалуйста, ");
-					break;
-			}
-		},
-		_handleResult: function(url, method, data) {
-			return $.ajax({
-				url: url,
-				timeout: 30000,
-				data: data,
-				type: method,
-				dataType: "json",
-				error: this.proxy("_handleError"),
-				contentType: "application/json; charset=utf-8"
-			});
-		}
-	});
+            switch (method) {
+                case "get":
+                    if (key) {
+                        url += key + "/"
+                    };
+                    url += "?email=" + escape(CURRENT_USER.email);
 
-	if (ns !== wader) {
-		ns.RESTDataProvider = wader.RESTDataProvider;
-	}
+                    return this._handleResult(url, method);
+                case "post":
+                    if (key) {
+                        url += key + "/";
+                    }
+                    delete value["disabled"];
+                    delete value["_created_at"];
+                    delete value["model_id"];
+                    return this._handleResult(url, method, JSON.stringify(value));
+                case "put":
+                    url += key + "/";
+                    delete value["disabled"];
+                    delete value["_created_at"];
+                    delete value["model_id"];
+                    delete value["uid"];
+                    return this._handleResult(url, method, JSON.stringify(value));
+                case "delete":
+                    url += key + "/";
+                    return this._handleResult(url, method, JSON.stringify(value));
+                case "getMulti":
+                    if (key && Object.keys(key),length) {
+                        key["email"] = CURRENT_USER.email;
+                    };
+                    url += this._buildQueryParams(key);
+                    return this._handleResult(url, "get");
+            }
+        },
+        _handleError: function(xhr, status, error) {
+            switch (xhr.status) {
+                case 12029:
+                case 0:
+                    ADataProvider.handleError("error", "Произошла ошибка при соединении с сервером, проверьте соединение с сетью и ");
+                    RUN_PING = true;
+                    break;
+                case 401:
+                    ADataProvider.handleError("login");
+                    break;
+                case 400:
+                    ADataProvider.handleError("error", "Произошла ошибка при соединении с сервером — ведутся временные технические работы. Пожалуйста, ");
+                    break;
+                case 502:
+                    ADataProvider.handleError("critical", "Произошла ошибка при соединении с сервером — ведутся временные технические работы.");
+                case 500:
+                    ADataProvider.handleError("critical", "Произошла ошибка при соединении с сервером — ведутся временные технические работы.");
+                    break;
+            }
+        },
+        _handleResult: function(url, method, data) {
+            if (method != "get") {
+                url += "?api_key=" + SECRET + "&email=" + escape(CURRENT_USER.email);
+            };
+            var request =  {
+                url: url,
+                timeout: 30000,
+                data: data,
+                type: method,
+                success: function(response) {
+                    if (response && "email" in response) {
+                        var currentEmail = CURRENT_USER.email;
+                        var newEmail = response.email;
+                        if (currentEmail && newEmail != currentEmail) {
+                            window.location.reload();
+                        }
+                    }
+                },
+                dataType: "json",
+                error: this.proxy("_handleError"),
+                contentType: "application/json; charset=utf-8"
+            };
+
+            return $.ajax(request);
+        }
+    });
+
+    if (ns !== wader) {
+        ns.RESTDataProvider = wader.RESTDataProvider;
+    }
 })(window.WADER_NS || window);

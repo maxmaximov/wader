@@ -4,7 +4,7 @@
  * @author Max Maximov <max.maximov@gmail.com>
  * @version 0.3
  */
-(function(ns) {
+(function (ns) {
     "use strict";
 
     /*
@@ -26,18 +26,17 @@
                 return wader.AModel.count++;
             },
 
-            getCollection: function() {
+            getCollection: function () {
                 return this._collection;
             },
 
-            getAttributes: function() {
+            getAttributes: function () {
                 return this._attributes;
             }
         },
         /* @Prototype */
         {
             setup: function () {
-
                 this._attribute = {};
                 this._createdAt = undefined;
                 this._updatedAt = undefined;
@@ -58,25 +57,28 @@
                     5: []
                 };
 
-                this._silent = false;
+                this._silent = [];
+                this._modifiedColumns = {};
                 this._virtual = false;
             },
 
-            construct: function() {
+            construct: function () {
 
             },
 
-            init: function(data) {
+            init: function (data) {
                 var that = this;
 
                 this._id = this.constructor.generateId();
                 this._attribute = {};
 
                 this.construct();
-
+                this._attributes["updated"] = {
+                    "type": Number
+                }
 
                 if (this._collection) {
-                    this._dp = this._collection._getDp();
+                    this._dp = this._collection.getDp();
                 };
 
                 this.setDefaults();
@@ -85,67 +87,68 @@
 
                 if (data) {
                     this.fromArray(data);
-                    if (!this.isValid()) {
-                        throw new Error("invalid data in \"" + this.constructor.fullName + "\"" + JSON.stringify(data).replace("@", "[at]"));
-                    }
+/*                    if (!this.isValid()) {
+                        throw new Error("invalid data in \"" + this.constructor.fullName + "\"" + JSON.stringify(data).replace(/\@/g, "[at]"));
+                    }*/
                     this.setState(wader.AModel.EXIST);
                 };
             },
 
-            remove: function() {
+            remove: function (silent) {
                 var promise = new $.Deferred();
 
-                if (!this.isCreated() && !this.isDeleted()) {
-                    if (this._parent) {
-                        this.onRemoveDone(promise);
-                    } else {
-                        $.when(this._dp.remove(this.getPrimaryKey()))
-                            .done(this.proxy("onRemoveDone", promise))
-                            .fail(this.proxy("onRemoveFail", promise));
-                    }
+                if (!silent && !this.isCreated() && !this.isDeleted()) {
+                    $.when(
+                        this._dp.remove(this.getPrimaryKey())
+                    ).done(
+                        this.onRemoveDone.bind(this, promise)
+                    ).fail(
+                        this.onRemoveFail.bind(this, promise)
+                    );
                 } else {
                     this.onRemoveDone(promise);
                 }
+
                 return promise;
             },
 
-            setDefaults: function() {
+            setDefaults: function () {
                 for (var field in this._attributes) {
-                    if (this._attributes[field]["default"]) {
+                    if (this._attributes[field].hasOwnProperty("default")) {
                         var setterName = "set" + field.charAt(0).toUpperCase() + field.substr(1, field.length-1);
                         this[setterName](this._attributes[field]["default"]);
                     };
                 };
             },
 
-            onRemoveDone: function(promise) {
-                this._collection.remove(this);
+            onRemoveDone: function (promise) {
                 this.setState(wader.AModel.DELETED);
-                promise.resolve()
+                this._collection.remove(this);
+                promise.resolve();
             },
 
-            onRemoveFail: function(promise) {
+            onRemoveFail: function (promise) {
                 promise.fail();
             },
 
-            save: function() {
+            save: function () {
                 var promise = new $.Deferred();
                 if (!(this.isExist() || this.isDeleted())) {
                     var arr = this.toArray()
                     var request = this.isCreated() ? this._dp.set("", arr) : this._dp.update(this.getPrimaryKey(), arr);
-                    request.done(this.proxy("_onSaveDone", promise));
-                    request.fail(this.proxy("_onSaveFail", promise));
+                    request.done(this._onSaveDone.bind(this, promise));
+                    request.fail(this._onSaveFail.bind(this, promise));
                 } else {
                     this._onSaveDone(promise);
                 }
                 return promise;
             },
 
-            load: function() {
+            load: function () {
                 throw new Error("IMPLEMENT IT, BITCH in " + this.constructor.fullName);
             },
 
-            _addObserver: function(event, callback) {
+            _addObserver: function (event, callback) {
                 if (!event in this._observers) {
                     throw new Error("Unknown event: " + event);
                 }
@@ -153,61 +156,72 @@
                 this._observers[event].push(callback);
             },
 
-            _removeObserver: function(event, callback) {
+            _removeObserver: function (event, callback) {
                 if (!event in this._observers) {
                     throw new Error("Unknown event: " + event);
                 };
 
                 for (var i = 0, l = this._observers[event].length; i < l; i++) {
                     if (this._observers[event][i] === callback) {
-                        this._observers[event][i] = null;
+                        this._observers[event].splice(i, 1);
                         break;
                     }
                 }
             },
 
-            _get: function(key) {
+            _notifyObservers: function (event) {
+                var args = Array.prototype.slice.call(arguments, 1);
+
+                if (!event in this._observers) {
+                    throw new Error("Unknown event: " + event);
+                }
+
+                this._observers[event].forEach(function(observer) {
+                    observer.apply(this, args);
+                }, this);
+
+            },
+
+            _get: function (key) {
                 if (!(key in this._attributes)) {
                     throw new Error("Не знаю ничего про свойство " + key + " атрибута модели " + this.constructor.fullName);
                 }
                 return this._attribute[key];
             },
 
-            removeProp: function(key) {
+            removeProp: function (key) {
                 if (!(key in this._attributes)) {
                     throw new Error("Не знаю ничего про свойство " + key + " атрибута модели " + this.constructor.fullName);
-                };
+                }
+
                 this._attribute[key] = undefined;
-                if (this.isNew()) {
+
+                if (!this.isSilent()) {
+                    this._notifyObservers(5, key);
+                }
+
+                if (this.isCreated()) {
+                } else if (this.isNew()) {
                     this.setState(wader.AModel.CREATED);
                 } else {
                     this.setState(wader.AModel.UPDATED);
                 }
-                if (!this.isSilent()) {
-                    this._observers[5].forEach(function(callback) {
-                        if (callback) {
-                            callback(this);
-                        };
-                    }, this);
-                };
             },
 
-            filterPropFromList: function(key, value) {
+            filterPropFromList: function (key, value) {
                 if (!(key in this._attributes)) {
                     throw new Error("Не знаю ничего про свойство " + key + " атрибута модели " + this.constructor.fullName);
-                };
-                this._attribute[key] = this._attribute[key].filter(function(item){
-                    if (item[this._relationKey] !== value) {
-                        return item;
-                    };
-                }, this);
+                }
+
+                var rk = this._relationKey;
+                var tmp = this._attribute[key].filter(function (item){
+                    return item["email"] !== value;
+                });
+
+                this._attribute[key] = tmp;
 
                 if (!this.isSilent()) {
-                    this._observers[5].forEach(function(callback) {
-                        if (callback) {
-                            callback(this);
-                        };
-                    }, this);
+                    this._notifyObservers(5, key, value);
                 }
 
                 if (this.isCreated()) {
@@ -220,13 +234,10 @@
                 return this;
             },
 
-            _set: function(key, value) {
-                /*if (typeof value == "string") {
-                    // TODO make correct clean values
-                    value = value.trim() ? value.trim() : void("Putin");
-                };*/
+            _set: function (key, value) {
+                if (!this._attribute.hasOwnProperty(key) || this._attribute[key] != value) {
+                    this._modifiedColumns[key] = true;
 
-                if (this._attribute[key] != value) {
                     if (this._attributes[key]["type"] === "list") {
                         if (typeof this._attribute[key] === "undefined") {
                             this._attribute[key] = [];
@@ -234,8 +245,8 @@
 
                         var exist = false;
 
-                        this._attribute[key].forEach(function(item) {
-                            if (item[this._relationKey] == value[this._relationKey]) {
+                        this._attribute[key].forEach(function (item) {
+                            if (item[this._relationKey] === value[this._relationKey]) {
                                 exist = true;
                                 return;
                             }
@@ -243,20 +254,13 @@
 
                         if (!exist) {
                             this._attribute[key].push(value);
-                        };
-
+                        }
                     } else {
                         this._attribute[key] = value;
                     }
 
-
                     if (!this.isSilent()) {
-                        this._observers[5].forEach(function(callback) {
-                            if (callback) {
-                                //callback(this);
-                                callback(key, value);
-                            };
-                        }, this);
+                        this._notifyObservers(5, key, value);
                     }
 
                     if (this.isCreated()) {
@@ -270,40 +274,56 @@
                 return this;
             },
 
-            _pull: function() {
+            _pull: function () {
                 var promise = new $.Deferred();
+
                 $.when(this._dp.get(this.getPrimaryKey()))
-                    .done(this.proxy("_onPullDone", promise))
-                    .fail(this.proxy("_onPullFail", promise));
+                    .done(
+                        this._onPullDone.bind(this, promise)
+                    )
+                    .fail(
+                        this._onPullFail.bind(this, promise)
+                    );
 
                 return promise;
             },
 
-            _onPullDone: function(promise, data) {
+            _onPullDone: function (promise, data) {
                 this.setSilentOn();
-                this.fromArray(data);
+
+                this._attribute = {};
+                this.setDefaults();
+                this.fromArray(data.data);
+                if (!this.isValid()) {
+                    throw new Error("invalid data in \"" + this.constructor.fullName + "\"" + JSON.stringify(data).replace(/\@/g, "[at]"));
+                }
+                this.setState(wader.AModel.EXIST);
+
+                //this._updatedAt = new DateTime();
                 this.setSilentOff();
                 this.touch();
-                this._updatedAt = new DateTime();
-                this.setState(wader.AModel.EXIST);
-                this._collection.refresh2();
+                this._collection.refresh2(this);
                 promise.resolve();
             },
 
-            _onPullFail: function(data) {
+            _onPullFail: function (data) {
                 throw new Error("pull fail");
             },
 
-            _onSaveDone: function(promise, data) {
+            _onSaveDone: function (promise, data) {
                 this._onSave(promise, data);
                 this._collection.refresh2(this);
             },
 
-            _onSaveFail: function(promise, data) {
+            _onSaveFail: function (promise, data) {
                 promise.reject();
             },
 
-            _validate: function() {
+            getModifiedColumns: function () {
+                return this._modifiedColumns;
+            },
+
+            _validate: function () {
                 var errors = {};
 
                 for (var idx in this._attributes) {
@@ -311,33 +331,37 @@
                         key = idx,
                         value = this._attribute[idx],
                         type = this._attributes[idx].type;
-                    if (attr.required && !value) {
+
+                    if (attr.required && (typeof value === "undefined" || value === null)) {
                         errors[idx] = {
                             "message": "обязательный параметр",
                             "input": value
                         }
                         continue;
                     }
+
                     if (value) {
                         var rawString = Object.prototype.toString.call(value).slice(8, -1);
 
                         if (!type) {
                             throw new Error("Incorrect Type");
                         }
+
                         if (type == "enum") {
                             var variants = this._attributes[idx]["variants"];
                             if (variants.indexOf(value) === -1) {
                                 errors[idx] = {
                                     "message": "значение, не принадлежащее списку возможных значений",
                                     "input": value
-                                };
-                            };
+                                }
+                            }
                             continue;
-                        };
+                        }
+
                         if (type == "list") {
                             // array of objects
                             var objectClass = this._attributes[idx]["objectClass"];
-                            value.forEach(function(item) {
+                            value.forEach(function (item) {
                                 item = item[this._relationKey];
                                 if (!(item instanceof objectClass) || !item.isValid()) {
                                     errors[idx] = {
@@ -347,44 +371,47 @@
                                 }
                             }, this);
                             continue;
-                        };
+                        }
+
                         if (typeof type === "object" || typeof type === "function") {
                             if (!value instanceof type) {
                                 errors[idx] = {
                                     "message": "неверный класс",
                                     "input": type
-                                };
+                                }
                             }
                         } else {
                             if (rawString !== type) {
                                 errors[idx] = {
                                     "message": "неверный тип",
                                     "input": type
-                                };
+                                }
                             }
-                        };
+                        }
+
                         if (attr.pattern) {
                             if (!attr.pattern.test(value)) {
                                 errors[idx] = {
                                     "message": "неверное значение",
                                     "input": value
-                                };
+                                }
                             }
-                        };
-                    };
+                        }
+                    }
                 }
+
                 this._lastValidationErrors = errors;
             },
 
-            getErrors: function(){
+            getErrors: function (){
                 return this._lastValidationErrors;
             },
 
-            _parse: function(data) {
+            _parse: function (data) {
                 throw new Error("В модели " + this.constructor.fullName + " не определен метод _parse");
             },
 
-            fromArray: function(data){
+            fromArray: function (data){
                 for (var field in data) {
                     var setterName = "set" + field.charAt(0).toUpperCase() + field.substr(1, field.length-1),
                         value = data[field];
@@ -393,15 +420,14 @@
                         if (field in this._attributes) {
                             if (field == "attendees") {
                                 // HAHA! OH WOW!
-                                value.forEach(function(item) {
-                                    var email = item.email,
-                                        access = item.access,
-                                        owner = item.owner,
-                                        val = {
-                                            "email": email,
-                                            "access": access,
-                                            "owner": owner,
+                                value.forEach(function (item) {
+                                    var val = {};
+
+                                    (["email", "name", "status", "access", "role", "confirm"]).forEach(function (prop) {
+                                        if (prop in item) {
+                                            val[prop] = item[prop];
                                         };
+                                    })
 
                                     this[setterName](val);
 
@@ -416,7 +442,7 @@
                 }
             },
 
-            toArray: function(recursively){
+            toArray: function (recursively){
                 var result = {
                         "model_id": this.getModelId(),
                         "_created_at": this.getCreatedAt(),
@@ -444,22 +470,25 @@
                         } else if (dep instanceof DateTime) {
                             result[key] = dep.toISOString();
                         } else if ($.isArray(dep)) {
-                            if (recursively) {
-                                result[key] = dep.map(function(item){
-                                    return item[rkey].toArray(recursively);
-                                });
+                            if (dep.length && dep[0][rkey] instanceof wader.AModel) {
+                                if (recursively) {
+                                    result[key] = dep.map(function (item){
+                                        return item[rkey].toArray(recursively);
+                                    });
+                                } else {
+                                    result[key] = dep.map(function (item){
+                                        var out = $.extend({}, item);
+                                        var obj = item[rkey].getPrimaryKey();
+
+                                        out[rkey] = obj;
+
+                                        return out;
+                                    }, this);
+                                }
                             } else {
-                                var hui = this.constructor.fullName;
-                                result[key] = dep.map(function(item){
-
-                                    var out = $.extend({}, item)
-
-                                    var obj = item[rkey].getPrimaryKey();
-                                    out[rkey] = obj;
-
-                                    return out;
-                                }, this);
+                                result[key] = dep;
                             }
+
                         }
                     }
                 }
@@ -467,12 +496,12 @@
             },
 
             setState: function (state) {
+                if (this._state !== state && state !== wader.AModel.UPDATED) {
+                    this._modifiedColumns = {};
+                }
+
                 this._state = state;
-                this._observers[state].forEach(function(callback) {
-                    if (callback) {
-                        callback(this);
-                    };
-                }, this);
+                this._notifyObservers(state);
             },
 
             getState: function (state) {
@@ -483,12 +512,16 @@
                 return this._id;
             },
 
-            getCreatedAt: function(){
+            getCreatedAt: function (){
                 return this._createdAt;
             },
 
-            getUpdatedAt: function(){
-                return this._updatedAt;
+            getUpdated: function (){
+                return this._get("updated");
+            },
+
+            setUpdated: function (updated) {
+                return this._set("updated", updated);
             },
 
             disable: function () {
@@ -505,10 +538,10 @@
                 this._collection.refresh2(this);
             },
 
-            reset: function() {
+            reset: function () {
                 if (this.isUpdated()) {
                     return this._pull();
-                };
+                }
             },
 
             isDisabled: function () {
@@ -516,64 +549,65 @@
             },
 
             isSilent: function () {
-                return this._silent;
+                return this._silent.length > 0;
             },
 
             isVirtual: function () {
                 return this._virtual;
             },
 
-            isNew: function() {
+            isNew: function () {
                 return this.getState() === wader.AModel.NULL;
             },
 
-            isCreated: function() {
+            isCreated: function () {
                 return this.getState() === wader.AModel.CREATED;
             },
 
-            isUpdated: function() {
+            isUpdated: function () {
                 return this.getState() === wader.AModel.UPDATED;
             },
 
-            isDeleted: function() {
+            isDeleted: function () {
                 return this.getState() === wader.AModel.DELETED;
             },
 
-            isExist: function() {
+            isExist: function () {
                 return this.getState() === wader.AModel.EXIST;
             },
 
-            onNew: function(callback) {
+            onNew: function (callback) {
                 return this._addObserver(wader.AModel.NULL, callback);
             },
 
-            onCreate: function(callback) {
+            onCreate: function (callback) {
                 return this._addObserver(wader.AModel.CREATED, callback);
             },
 
-            onUpdate: function(callback) {
+            onUpdate: function (callback) {
                 return this._addObserver(wader.AModel.UPDATED, callback);
             },
 
-            onDelete: function(callback) {
+            onDelete: function (callback) {
                 return this._addObserver(wader.AModel.DELETED, callback);
             },
 
-            onExist: function(callback) {
+            onExist: function (callback) {
                 return this._addObserver(wader.AModel.EXIST, callback);
             },
 
-            onModify: function(callback) {
+            onModify: function (callback) {
                 return this._addObserver(5, callback);
             },
 
-            getPrimaryKey: function() {
+            getPrimaryKey: function () {
                 throw new Error("В модели " + this.constructor.fullName + " не определен метод getPrimaryKey");
             },
 
-            isValid: function() {
+            isValid: function () {
                 this._validate();
-                if (Object.keys(this.getErrors()).length === 0 && this.validate()) {
+
+                if (this.validate() && Object.keys(this.getErrors()).length === 0) {
                     return true;
                 } else {
                     Logger.warn(this, this.getErrors());
@@ -581,36 +615,34 @@
                 }
             },
 
-            validate: function() {
+            validate: function () {
                 //Logger.warn("В модели " + this.constructor.fullName + " не определен метод validate");
                 return true;
             },
 
-            setSilentOn: function() {
-                this._silent = true;
+            setSilentOn: function () {
+                this._silent.push(true);
             },
 
-            setSilentOff: function() {
-                this._silent = false;
+            setSilentOff: function () {
+                this._silent.pop(true);
             },
 
-            addToCollection: function() {
-                if (!this.isCreated() || !this.isNew()) {
-                    this._collection.add(this);
-                };
+            addToCollection: function () {
+                this._collection.add(this);
                 return this;
             },
 
-            touch: function() {
-                this._observers[5].forEach(function(callback) {
-                    if (callback) {
-                        //callback(this);
-                        callback();
-                    };
-                }, this);
+            refreshCollection: function () {
+                this._collection.refresh(this);
+                this._collection.refresh2(this);
             },
 
-            toString: function() {
+            touch: function () {
+                this._notifyObservers(5);
+            },
+
+            toString: function () {
                 return this.getPrimaryKey();
             }
         });

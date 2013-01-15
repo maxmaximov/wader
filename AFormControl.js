@@ -16,9 +16,10 @@
         },
         /* @Prototype */
         {
-            setup: function (label, data, container, callback) {
+            setup: function (label, data, container, callback, name) {
                 this._label = label;
                 this._data = data;
+                this._name = name;
                 this._container = container;
                 this._callback = callback;
 

@@ -17,7 +17,7 @@
         _timeout: 1000,
 
         _interval: null,
-        _intervalDelay: 50,
+        _intervalDelay: 10,
         _killInterval: 3000,
 
         _selectors: [],

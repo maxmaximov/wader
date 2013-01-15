@@ -4,7 +4,8 @@
  * @author Max Maximov <max.maximov@gmail.com>
  * @version 0.3
  */
-(function(ns) {
+
+(function (ns) {
     "use strict";
 
     /*
@@ -61,23 +62,16 @@
             return this._promise;
         },
 
-        _preOnPrepare: function(item) {},
-
         _onPrepare: function (data) {
             var items = [];
             var item;
+            data = data.data;
 
-            for (var i = 0, l = data.objects.length; i < l; i++) {
-                try {
-                    item = new this._itemClass(data.objects[i]);
-                    this._preOnPrepare(item);
-                } catch (e) {
-                    Raven.captureException(e);
-                    Logger.warn(this, e);
-                    continue;
-                }
-
-                items.push(item);
+            for (var i = 0, l = data.length; i < l; i++) {
+                item = new this._itemClass(data[i]);
+                if (item.isValid()) {
+                    items.push(item);
+                };
             }
 
             this._items = items;
@@ -86,7 +80,7 @@
             this._promise.resolve(items);
         },
 
-        _getDp: function () {
+        getDp: function () {
             return this._dp;
         },
 
@@ -134,11 +128,11 @@
             var items = [];
             for (var i = 0, l = this._items.length; i < l; i++) {
                 if (this._items[i] && !this._items[i].isDeleted() && !this._items[i].isNew()) {
-                    items[i] = this._items[i].toArray(recursive);
+                    items.push(this._items[i].toArray(recursive));
                 }
             }
 
-            return { "objects": items };
+            return { "data": items };
         },
 
         addObserver: function (callback) {
@@ -161,11 +155,16 @@
         },
 
         add: function (item) {
-            if (this._items.indexOf(item) === -1) {
+            if (!this.has(item)) {
                 this._items.push(item);
-                this._notifyObservers();
-                this._notifyObservers2("add", item);
             }
+
+            if (!item.isNew()) {
+                this._notifyObservers2("add", item);
+                this._notifyObservers();
+            }
+
+            return item;
         },
 
         remove: function (item) {
@@ -178,15 +177,17 @@
 
             this._notifyObservers();
             this._notifyObservers2("remove", item);
+
+            return item;
         },
 
         _sort: function (items, key) {
-            items.sort(function(a, b){
+            items.sort(function (a, b){
                 return a[key]() - b[key]();
             });
         },
 
-        addObserver2: function(event, callback) {
+        addObserver2: function (event, callback) {
             if (!event in this._observers2) {
                 throw new Error("Unknown event: " + event);
             }
@@ -194,7 +195,7 @@
             this._observers2[event].push(callback);
         },
 
-        removeObserver2: function(event, callback) {
+        removeObserver2: function (event, callback) {
             if (!event in this._observers2) {
                 throw new Error("Unknown event: " + event);
             };
@@ -207,30 +208,36 @@
             }
         },
 
-        _notifyObservers2: function(event, data) {
+        _notifyObservers2: function (event, data) {
             if (!event in this._observers2) {
                 throw new Error("Unknown event: " + event);
             }
 
             for (var i = 0, l = this._observers2[event].length; i < l; i++) {
-                this._observers2[event][i](data);
+                if (this._observers2[event][i]) {
+                    this._observers2[event][i](data);
+                }
             }
         },
 
-        onAdd: function(callback) {
-            return this._addObserver2("add", callback);
+        onAdd: function (callback) {
+            return this.addObserver2("add", callback);
         },
 
-        onRemove: function(callback) {
-            return this._addObserver2("remove", callback);
+        onRemove: function (callback) {
+            return this.addObserver2("remove", callback);
         },
 
-        onUpdate: function(callback) {
-            return this._addObserver2("update", callback);
+        onUpdate: function (callback) {
+            return this.addObserver2("update", callback);
         },
 
-        onModify: function(callback) {
-            return this._addObserver2("modify", callback);
+        onModify: function (callback) {
+            return this.addObserver2("modify", callback);
+        },
+
+        has: function (model) {
+            return this.getAll().indexOf(model) !== -1;
         }
     });
 
