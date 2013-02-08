@@ -1,17 +1,16 @@
-/**
- * Wader Abstract Model
- *
- * @author Max Maximov <max.maximov@gmail.com>
- * @version 0.3
- */
 (function (ns) {
     "use strict";
 
-    /*
-    * @abstract wader.AModel
-    */
+    /**
+     * @name wader.AModel
+     * @class Wader Abstract Model
+     * @abstract
+     * @author Max Maximov <max.maximov@gmail.com>
+     * @version 0.3
+     */
     $.Class.extend("wader.AModel",
-        /* @Static */
+
+        /** @lends wader.AModel */
         {
             NULL: 0,
             CREATED: 1,
@@ -19,6 +18,9 @@
             UPDATED: 3,
             DELETED: 4,
 
+            /**
+             * @return {Number}
+             */
             generateId: function () {
                 if (!wader.AModel.count) {
                     wader.AModel.count = 1;
@@ -26,20 +28,28 @@
                 return wader.AModel.count++;
             },
 
+            /**
+             * @return {wader.ACollection}
+             */
             getCollection: function () {
                 return this._collection;
             },
 
+            /**
+             * @return {Hash}
+             */
             getAttributes: function () {
                 return this._attributes;
             }
         },
-        /* @Prototype */
+
+        /** @lends wader.AModel# */
         {
+            /**
+             * @return {undefined}
+             */
             setup: function () {
                 this._attribute = {};
-                this._createdAt = undefined;
-                this._updatedAt = undefined;
                 this._disabled = false;
                 this._collectionClass = undefined;
                 this._collection = undefined;
@@ -66,6 +76,10 @@
 
             },
 
+            /**
+             * @param {Hash} data
+             * @return {undefined}
+             */
             init: function (data) {
                 var that = this;
 
@@ -94,6 +108,10 @@
                 };
             },
 
+            /**
+             * @param {Boolean} silent
+             * @return {$.Deferred}
+             */
             remove: function (silent) {
                 var promise = new $.Deferred();
 
@@ -112,6 +130,9 @@
                 return promise;
             },
 
+            /**
+             * @return {undefined}
+             */
             setDefaults: function () {
                 for (var field in this._attributes) {
                     if (this._attributes[field].hasOwnProperty("default")) {
@@ -121,18 +142,30 @@
                 };
             },
 
+            /**
+             * @param {$.Deferred} promise
+             * @return {undefined}
+             */
             onRemoveDone: function (promise) {
                 this.setState(wader.AModel.DELETED);
                 this._collection.remove(this);
                 promise.resolve();
             },
 
+            /**
+             * @param {$.Deferred} promise
+             * @return {undefined}
+             */
             onRemoveFail: function (promise) {
                 promise.fail();
             },
 
+            /**
+             * @return {$.Deferred}
+             */
             save: function () {
                 var promise = new $.Deferred();
+
                 if (!(this.isExist() || this.isDeleted())) {
                     var arr = this.toArray()
                     var request = this.isCreated() ? this._dp.set("", arr) : this._dp.update(this.getPrimaryKey(), arr);
@@ -144,10 +177,19 @@
                 return promise;
             },
 
+            /**
+             * @abstract
+             */
             load: function () {
                 throw new Error("IMPLEMENT IT, BITCH in " + this.constructor.fullName);
             },
 
+            /**
+             * @param {*} event
+             * @param {Function} callback
+             * @return {undefined}
+             * @throws {Error}
+             */
             _addObserver: function (event, callback) {
                 if (!event in this._observers) {
                     throw new Error("Unknown event: " + event);
@@ -156,6 +198,12 @@
                 this._observers[event].push(callback);
             },
 
+            /**
+             * @param {*} event
+             * @param {Function} callback
+             * @return {undefined}
+             * @throws {Error}
+             */
             _removeObserver: function (event, callback) {
                 if (!event in this._observers) {
                     throw new Error("Unknown event: " + event);
@@ -169,6 +217,11 @@
                 }
             },
 
+            /**
+             * @param {*} event
+             * @return {undefined}
+             * @throws {Error}
+             */
             _notifyObservers: function (event) {
                 var args = Array.prototype.slice.call(arguments, 1);
 
@@ -176,12 +229,17 @@
                     throw new Error("Unknown event: " + event);
                 }
 
-                this._observers[event].forEach(function(observer) {
+                this._observers[event].forEach(function (observer) {
                     observer.apply(this, args);
                 }, this);
 
             },
 
+            /**
+             * @param {String} key
+             * @return {*}
+             * @throws {Error}
+             */
             _get: function (key) {
                 if (!(key in this._attributes)) {
                     throw new Error("Не знаю ничего про свойство " + key + " атрибута модели " + this.constructor.fullName);
@@ -189,6 +247,11 @@
                 return this._attribute[key];
             },
 
+            /**
+             * @param {String} key
+             * @return {undefined}
+             * @throws {Error}
+             */
             removeProp: function (key) {
                 if (!(key in this._attributes)) {
                     throw new Error("Не знаю ничего про свойство " + key + " атрибута модели " + this.constructor.fullName);
@@ -208,6 +271,12 @@
                 }
             },
 
+            /**
+             * @param {String} key
+             * @param {*} value
+             * @return {wader.AModel}
+             * @throws {Error}
+             */
             filterPropFromList: function (key, value) {
                 if (!(key in this._attributes)) {
                     throw new Error("Не знаю ничего про свойство " + key + " атрибута модели " + this.constructor.fullName);
@@ -234,6 +303,11 @@
                 return this;
             },
 
+            /**
+             * @param {String} key
+             * @param {*} value
+             * @return {wader.AModel}
+             */
             _set: function (key, value) {
                 if (!this._attribute.hasOwnProperty(key) || this._attribute[key] != value) {
                     this._modifiedColumns[key] = true;
@@ -274,6 +348,9 @@
                 return this;
             },
 
+            /**
+             * @return {$.Deferred}
+             */
             _pull: function () {
                 var promise = new $.Deferred();
 
@@ -288,6 +365,12 @@
                 return promise;
             },
 
+            /**
+             * @param {$.Deferred} promise
+             * @param {Hash} data
+             * @return {undefined}
+             * @throws {Error}
+             */
             _onPullDone: function (promise, data) {
                 this.setSilentOn();
 
@@ -306,23 +389,46 @@
                 promise.resolve();
             },
 
+            /**
+             * @throws {Error}
+             */
             _onPullFail: function (data) {
                 throw new Error("pull fail");
             },
 
+            /**
+             * @param {Hash} data
+             * @return {undefined}
+             */
             _onSaveDone: function (promise, data) {
                 this._onSave(promise, data);
-                this._collection.refresh2(this);
+                if (!this._collection.has(this)) {
+                    this._collection.add(this);
+                } else {
+                    this._collection.refresh2(this);
+                }
             },
 
+            /**
+             * @param {$.Deferred} promise
+             * @param {Hash} data
+             * @return {undefined}
+             */
             _onSaveFail: function (promise, data) {
                 promise.reject();
             },
 
+            /**
+             * @return {Hash}
+             */
             getModifiedColumns: function () {
                 return this._modifiedColumns;
             },
 
+            /**
+             * @return {undefined}
+             * @throws {Error}
+             */
             _validate: function () {
                 var errors = {};
 
@@ -403,14 +509,24 @@
                 this._lastValidationErrors = errors;
             },
 
+            /**
+             * @return {Hash}
+             */
             getErrors: function (){
                 return this._lastValidationErrors;
             },
 
+            /**
+             * @throws {Error}
+             */
             _parse: function (data) {
                 throw new Error("В модели " + this.constructor.fullName + " не определен метод _parse");
             },
 
+            /**
+             * @param {Hash} data
+             * @return {undefined}
+             */
             fromArray: function (data){
                 for (var field in data) {
                     var setterName = "set" + field.charAt(0).toUpperCase() + field.substr(1, field.length-1),
@@ -442,6 +558,10 @@
                 }
             },
 
+            /**
+             * @param {Boolean} recursively
+             * @return {Hash}
+             */
             toArray: function (recursively){
                 var result = {
                         "model_id": this.getModelId(),
@@ -495,6 +615,10 @@
                 return result;
             },
 
+            /**
+             * @param {Number} state
+             * @return {undefined}
+             */
             setState: function (state) {
                 if (this._state !== state && state !== wader.AModel.UPDATED) {
                     this._modifiedColumns = {};
@@ -504,26 +628,45 @@
                 this._notifyObservers(state);
             },
 
-            getState: function (state) {
+            /**
+             * @return {Number}
+             */
+            getState: function () {
                 return this._state;
             },
 
+            /**
+             * @return {Number}
+             */
             getModelId: function () {
                 return this._id;
             },
 
+            /**
+             * @return {date.DateTime}
+             */
             getCreatedAt: function (){
                 return this._createdAt;
             },
 
+            /**
+             * @return {Number}
+             */
             getUpdated: function (){
                 return this._get("updated");
             },
 
+            /**
+             * @param {Number}
+             * @return {wader.AModel}
+             */
             setUpdated: function (updated) {
                 return this._set("updated", updated);
             },
 
+            /**
+             * @return {undefined}
+             */
             disable: function () {
                 this._disabled = true;
                 this._updatedAt = new DateTime();
@@ -531,6 +674,9 @@
                 this._collection.refresh2(this);
             },
 
+            /**
+             * @return {undefined}
+             */
             enable: function () {
                 this._disabled = false;
                 this._updatedAt = new DateTime();
@@ -538,72 +684,129 @@
                 this._collection.refresh2(this);
             },
 
+            /**
+             * @return {$.Deferred}
+             */
             reset: function () {
                 if (this.isUpdated()) {
                     return this._pull();
                 }
             },
 
+            /**
+             * @return {Boolean}
+             */
             isDisabled: function () {
                 return this._disabled;
             },
 
+            /**
+             * @return {Boolean}
+             */
             isSilent: function () {
                 return this._silent.length > 0;
             },
 
+            /**
+             * @return {Boolean}
+             */
             isVirtual: function () {
                 return this._virtual;
             },
 
+            /**
+             * @return {Boolean}
+             */
             isNew: function () {
                 return this.getState() === wader.AModel.NULL;
             },
 
+            /**
+             * @return {Boolean}
+             */
             isCreated: function () {
                 return this.getState() === wader.AModel.CREATED;
             },
 
+            /**
+             * @return {Boolean}
+             */
             isUpdated: function () {
                 return this.getState() === wader.AModel.UPDATED;
             },
 
+            /**
+             * @return {Boolean}
+             */
             isDeleted: function () {
                 return this.getState() === wader.AModel.DELETED;
             },
 
+            /**
+             * @return {Boolean}
+             */
             isExist: function () {
                 return this.getState() === wader.AModel.EXIST;
             },
 
+            /**
+             * @param {Function} callback
+             * @return {undefined}
+             */
             onNew: function (callback) {
                 return this._addObserver(wader.AModel.NULL, callback);
             },
 
+            /**
+             * @param {Function} callback
+             * @return {undefined}
+             */
             onCreate: function (callback) {
                 return this._addObserver(wader.AModel.CREATED, callback);
             },
 
+            /**
+             * @param {Function} callback
+             * @return {undefined}
+             */
             onUpdate: function (callback) {
                 return this._addObserver(wader.AModel.UPDATED, callback);
             },
 
+            /**
+             * @param {Function} callback
+             * @return {undefined}
+             */
             onDelete: function (callback) {
                 return this._addObserver(wader.AModel.DELETED, callback);
             },
 
+            /**
+             * @param {Function} callback
+             * @return {undefined}
+             */
             onExist: function (callback) {
                 return this._addObserver(wader.AModel.EXIST, callback);
             },
 
+            /**
+             * @param {Function} callback
+             * @return {undefined}
+             */
             onModify: function (callback) {
                 return this._addObserver(5, callback);
             },
 
+            /**
+             * @throws {Error}
+             */
             getPrimaryKey: function () {
                 throw new Error("В модели " + this.constructor.fullName + " не определен метод getPrimaryKey");
             },
 
+            /**
+             * @return {Boolean}
+             */
             isValid: function () {
                 this._validate();
 
@@ -615,33 +818,54 @@
                 }
             },
 
+            /**
+             * @return {Boolean}
+             */
             validate: function () {
                 //Logger.warn("В модели " + this.constructor.fullName + " не определен метод validate");
                 return true;
             },
 
+            /**
+             * @return {undefined}
+             */
             setSilentOn: function () {
                 this._silent.push(true);
             },
 
+            /**
+             * @return {undefined}
+             */
             setSilentOff: function () {
                 this._silent.pop(true);
             },
 
+            /**
+             * @return {wader.AModel}
+             */
             addToCollection: function () {
                 this._collection.add(this);
                 return this;
             },
 
+            /**
+             * @return {undefined}
+             */
             refreshCollection: function () {
                 this._collection.refresh(this);
                 this._collection.refresh2(this);
             },
 
+            /**
+             * @return {undefined}
+             */
             touch: function () {
                 this._notifyObservers(5);
             },
 
+            /**
+             * @return {String}
+             */
             toString: function () {
                 return this.getPrimaryKey();
             }

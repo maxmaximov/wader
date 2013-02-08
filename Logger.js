@@ -1,14 +1,15 @@
-/**
- * Wader Logger module
- *
- * @author Max Maximov <max.maximov@gmail.com>
- * @version 0.3
- */
-(function(ns) {
+(function (ns) {
     "use strict";
 
+    /**
+     * @name wader.Logger
+     * @class Wader Logger
+     * @author Max Maximov <max.maximov@gmail.com>
+     * @version 0.3
+     */
     $.Class.extend("wader.Logger",
-    /* @static */
+
+    /** @lends wader.Logger */
     {
         NONE: 0,
         ERROR: 1,
@@ -20,6 +21,9 @@
         level: 1,
         ie: false,
 
+        /**
+         * @return {*[]}
+         */
         _parseArgs: function () {
             var args = Array.prototype.slice.call(arguments[0]);
 
@@ -27,6 +31,11 @@
             return ([typeof args[0] == "object" ? "[" + args[0].constructor.fullName + "]" : args[0]].concat(args.slice(1)));
         },
 
+        /**
+         * @param {Arguments} args
+         * @param {String} type
+         * @return {undefined}
+         */
         _echo: function (args, type) {
             var args = wader.Logger._parseArgs(args);
 
@@ -41,27 +50,43 @@
             }
         },
 
+        /**
+         * @return {undefined}
+         */
         log: function () {
             if (wader.Logger.level >= wader.Logger.LOG) wader.Logger._echo(arguments, "log");
         },
 
+        /**
+         * @return {undefined}
+         */
         debug: function () {
             if (wader.Logger.level >= wader.Logger.DEBUG) wader.Logger._echo(arguments, "debug");
         },
 
+        /**
+         * @return {undefined}
+         */
         info: function () {
             if (wader.Logger.level >= wader.Logger.INFO) wader.Logger._echo(arguments, "info");
         },
 
+        /**
+         * @return {undefined}
+         */
         warn: function () {
             if (wader.Logger.level >= wader.Logger.WARN) wader.Logger._echo(arguments, "warn");
         },
 
+        /**
+         * @return {undefined}
+         */
         error: function () {
             if (wader.Logger.level >= wader.Logger.ERROR) wader.Logger._echo(arguments, "error");
         }
     },
-    /* @prototype */
+
+    /** @lends wader.Logger# */
     {
     });
 

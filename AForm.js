@@ -1,21 +1,28 @@
-/**
- * Wader Abstract Form
- *
- * @author Max Maximov <max.maximov@gmail.com>
- * @version 0.3
- */
 (function (ns) {
     "use strict";
 
-    /*
-    * @abstract wader.AForm
-    */
+    /**
+     * @name wader.AForm
+     * @class Wader Abstract Form
+     * @abstract
+     * @augments wader.AView
+     * @author Max Maximov <max.maximov@gmail.com>
+     * @version 0.3
+     */
     AView.extend("wader.AForm",
-        /* @Static */
+
+        /** @lends wader.AForm */
         {
         },
-        /* @Prototype */
+
+        /** @lends wader.AForm# */
         {
+            /**
+             * @param {wader.AModel} model
+             * @param {jQuery} container
+             * @param {Hash} options
+             * @return {undefined}
+             */
             setup: function (model, container, options) {
                 this._super(model, container, options);
                 this._controls = [];
@@ -24,16 +31,25 @@
                 this._escaper = Escaper.getInstance();
             },
 
+            /**
+             * @return {undefined}
+             */
             unrender: function () {
                 this._escaper.unsub(this.close);
                 this._form = void("Navalny");
                 this._super();
             },
 
+            /**
+             * @param {jQuery} container
+             * @return {undefined}
+             */
             attach: function (container) {
                 this._super(container);
 
-                if (!this._form) return;
+                if (!this._form) {
+                    return;
+                }
 
                 this._form.off("reset").on("reset", this._onReset);
                 this._form.off("submit").on("submit", this._onSubmit);
@@ -45,6 +61,9 @@
                 }.bind(this));
             },
 
+            /**
+             * @return {undefined}
+             */
             close: function () {
                 if (this._model) {
                     if (this._model.isCreated()) {
@@ -57,6 +76,9 @@
                 this.destroy();
             },
 
+            /**
+             * @return {undefined}
+             */
             _render: function () {
                 this._form = this._node.find("form");
                 //this._form[0].waderForm = this;
@@ -76,6 +98,10 @@
                 this._super();
             },
 
+            /**
+             * @param {jQuery} container
+             * @return {undefined}
+             */
             restore: function (container) {
                 this._super(container);
                 this._controls.forEach(function (control) {
@@ -89,6 +115,9 @@
                 }.bind(this), 20);
             },
 
+            /**
+             * @return {undefined}
+             */
             _onReset: function (e) {
                 this.close();
             },
@@ -97,19 +126,32 @@
                 this.close();
             },*/
 
+            /**
+             * @abstract
+             */
             _onSubmit: function (e) {
             },
 
+            /**
+             * @abstract
+             */
             _onInvalid: function (error) {
             },
 
             _onSave: function (response) {
             },
 
+            /**
+             * @abstract
+             */
             _onFail: function (response) {
             },
 
-            _onModify: function (key, value) {
+            /**
+             * @param {String} key
+             * @return {undefined}
+             */
+            _onModify: function (key) {
                 this._controls.forEach(function (control) {
                     if (~control["dependencies"].indexOf(key)) {
                         control["instance"].unrender();

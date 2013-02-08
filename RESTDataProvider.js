@@ -1,18 +1,36 @@
-(function(ns) {
+(function (ns) {
     "use strict";
 
-    ADataProvider.extend("wader.RESTDataProvider", {}, {
-        /* @Private */
-        init: function(resource, baseUrl) {
+    /**
+     * @name wader.RESTDataProvider
+     * @class Wader REST Data Provider
+     * @augments wader.ADataProvider
+     * @author sc0rp10 <dev@weblab.pro>
+     * @version 0.3
+     */
+    ADataProvider.extend("wader.RESTDataProvider",
+
+    /** @lends wader.RESTDataProvider */
+    {
+    },
+
+    /** @lends wader.RESTDataProvider# */
+    {
+        init: function (resource, baseUrl) {
             this.resource = resource;
             this.baseUrl = baseUrl;
         },
-        _buildQueryParams: function(data) {
+
+        /**
+         * @param {String|Hash} data
+         * @return {String}
+         */
+        _buildQueryParams: function (data) {
             var value,
                 key,
                 tmp = [],
                 that = this,
-                urlencode = function(str) {
+                urlencode = function (str) {
                     str = (str + "").toString();
                     return encodeURIComponent(str).replace(/!/g, "%21").replace(/"/g, "%27").replace(/\(/g, "%28").replace(/\)/g, "%29").replace(/\*/g, "%2A").replace(/%20/g, "+");
                 },
@@ -42,10 +60,10 @@
                 };
             if (!data) {
                 return "";
-            };
+            }
             if (typeof data == "string") {
                 return data + "/";
-            };
+            }
             data["email"] = CURRENT_USER.email;
             for (key in data) {
                 value = data[key];
@@ -54,7 +72,14 @@
 
             return "?" + tmp.join(arg_separator);
         },
-        _makeRequest: function(method, key, value) {
+
+        /**
+         * @param {String} method
+         * @param {String} key
+         * @param {String} value
+         * @return {jqXHR}
+         */
+        _makeRequest: function (method, key, value) {
             var url = this.baseUrl + this.resource + "/",
                 data = {},
                 value = value || {};
@@ -93,7 +118,14 @@
                     return this._handleResult(url, "get");
             }
         },
-        _handleError: function(xhr, status, error) {
+
+        /**
+         * @param {jqXHR} xhr
+         * @param {String} status
+         * @param {String} error
+         * @return {undefined}
+         */
+        _handleError: function (xhr, status, error) {
             switch (xhr.status) {
                 case 12029:
                 case 0:
@@ -113,16 +145,25 @@
                     break;
             }
         },
-        _handleResult: function(url, method, data) {
+
+        /**
+         * @param {String} url
+         * @param {String} status
+         * @param {Hash} data
+         * @return {jqXHR}
+         */
+        _handleResult: function (url, method, data) {
             if (method != "get") {
                 url += "?api_key=" + SECRET + "&email=" + escape(CURRENT_USER.email);
-            };
-            var request =  {
+            }
+
+            var request = {
                 url: url,
                 timeout: 30000,
                 data: data,
                 type: method,
-                success: function(response) {
+                /** @inner */
+                success: function (response) {
                     if (response && "email" in response) {
                         var currentEmail = CURRENT_USER.email;
                         var newEmail = response.email;

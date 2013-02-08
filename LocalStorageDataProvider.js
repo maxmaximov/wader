@@ -1,8 +1,26 @@
-(function(ns) {
+(function (ns) {
     "use strict";
-    ADataProvider.extend("wader.LocalStorageDataProvider", {
+
+    /**
+     * @name wader.LocalStorageDataProvider
+     * @class Wader LocalStorage Data Provider
+     * @augments wader.ADataProvider
+     * @author sc0rp10 <dev@weblab.pro>
+     * @version 0.3
+     */
+    ADataProvider.extend("wader.LocalStorageDataProvider",
+
+    /** @lends wader.LocalStorageDataProvider# */
+    {
         _ls: window.localStorage,
-        _makeRequest: function(method, key, value) {
+
+        /**
+         * @param {String} method
+         * @param {String} key
+         * @param {String} value
+         * @return {undefined}
+         */
+        _makeRequest: function (method, key, value) {
             var newKey = this.resource + "_" + key;
             switch (method) {
                 case "get":
@@ -21,7 +39,12 @@
                     break;
             }
         },
-        getMulti: function(pattern){
+
+        /**
+         * @param {String} pattern
+         * @return {Hash[]}
+         */
+        getMulti: function (pattern) {
             if (!pattern instanceof RegExp) {
                 throw new Error("Invalid params in LocalStorageDataProvider.getMulti: pattern must be instance of RegExp");
             };

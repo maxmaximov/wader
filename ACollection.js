@@ -1,32 +1,37 @@
-/**
- * Wader Abstract Collection
- *
- * @author Max Maximov <max.maximov@gmail.com>
- * @version 0.3
- */
-
 (function (ns) {
     "use strict";
 
-    /*
-    * @abstract wader.ACollection
-    */
+    /**
+     * @name wader.ACollection
+     * @class Wader Abstract Collection
+     * @abstract
+     * @author Max Maximov <max.maximov@gmail.com>
+     * @version 0.3
+     */
     $.Class.extend("wader.ACollection",
 
-    /* @Static */
+    /** @lends wader.ACollection */
     {
         _instance: void("Putin"),
+
+        /**
+         * @return {wader.ACollection}
+         */
         getInstance: function () {
             var args = Array.prototype.slice.call(arguments);
             if (!this._instance) {
                 this._instance = new this(args);
             }
+
             return this._instance;
         }
     },
 
-    /* @Prototype */
+    /** @lends wader.ACollection# */
     {
+        /**
+         * @return {undefined}
+         */
         setup: function () {
             this._prepared = false;
             this._items = [];
@@ -45,10 +50,17 @@
             };
         },
 
+        /**
+         * @param {$.Deferred} promise
+         * @return {undefined}
+         */
         _addPromise: function (promise) {
             this._promises.push(promise);
         },
 
+        /**
+         * @return {$.Deferred}
+         */
         prepare: function () {
             if (!this._promise) {
                 this._promise = new $.Deferred();
@@ -62,6 +74,10 @@
             return this._promise;
         },
 
+        /**
+         * @param {Hash} data
+         * @return {undefined}
+         */
         _onPrepare: function (data) {
             var items = [];
             var item;
@@ -80,18 +96,32 @@
             this._promise.resolve(items);
         },
 
+        /**
+         * @return {wader.ADataProvider}
+         */
         getDp: function () {
             return this._dp;
         },
 
+        /**
+         * @return {undefined}
+         */
         refresh: function () {
             this._notifyObservers();
         },
 
+        /**
+         * @param {wader.AModel} item
+         * @return {undefined}
+         */
         refresh2: function (item) {
             this._notifyObservers2("update", item);
         },
 
+        /**
+         * @param {Number} id
+         * @return {wader.AModel}
+         */
         getByModelId: function (id) {
             for (var i = 0, l = this._items.length; i < l; i++) {
                 if (this._items[i] && this._items[i].getModelId() == id) {
@@ -100,6 +130,9 @@
             }
         },
 
+        /**
+         * @return {wader.AModel[]}
+         */
         getAll: function () {
             var items = [];
 
@@ -112,6 +145,9 @@
             return items;
         },
 
+        /**
+         * @return {wader.AModel[]}
+         */
         getAllWithDisabled: function () {
             var items = [];
 
@@ -124,6 +160,10 @@
             return items;
         },
 
+        /**
+         * @param {Boolean} recursive
+         * @return {Hash}
+         */
         toArray: function (recursive) {
             var items = [];
             for (var i = 0, l = this._items.length; i < l; i++) {
@@ -135,10 +175,18 @@
             return { "data": items };
         },
 
+        /**
+         * @param {Function} callback
+         * @return {undefined}
+         */
         addObserver: function (callback) {
             this._observers.push(callback);
         },
 
+        /**
+         * @param {Function} callback
+         * @return {undefined}
+         */
         removeObserver: function (callback) {
             for (var i = 0, l = this._observers.length; i < l; i++) {
                 if (this._observers[i] === callback) {
@@ -148,12 +196,19 @@
             }
         },
 
+        /**
+         * @return {undefined}
+         */
         _notifyObservers: function () {
             for (var i = 0, l = this._observers.length; i < l; i++) {
                 this._observers[i]();
             }
         },
 
+        /**
+         * @param {wader.AModel} item
+         * @return {wader.AModel}
+         */
         add: function (item) {
             if (!this.has(item)) {
                 this._items.push(item);
@@ -167,6 +222,10 @@
             return item;
         },
 
+        /**
+         * @param {wader.AModel} item
+         * @return {wader.AModel}
+         */
         remove: function (item) {
             for (var i = 0, l = this._items.length; i < l; i++) {
                 if (this._items[i] && this._items[i] === item) {
@@ -181,12 +240,23 @@
             return item;
         },
 
+        /**
+         * @param {wader.AModel[]} items
+         * @param {String} key
+         * @return {undefined}
+         */
         _sort: function (items, key) {
             items.sort(function (a, b){
                 return a[key]() - b[key]();
             });
         },
 
+        /**
+         * @param {String} event
+         * @param {Function} callback
+         * @return {undefined}
+         * @throws {Error}
+         */
         addObserver2: function (event, callback) {
             if (!event in this._observers2) {
                 throw new Error("Unknown event: " + event);
@@ -195,6 +265,12 @@
             this._observers2[event].push(callback);
         },
 
+        /**
+         * @param {String} event
+         * @param {Function} callback
+         * @return {undefined}
+         * @throws {Error}
+         */
         removeObserver2: function (event, callback) {
             if (!event in this._observers2) {
                 throw new Error("Unknown event: " + event);
@@ -208,6 +284,12 @@
             }
         },
 
+        /**
+         * @param {String} event
+         * @param {wader.AModel} data
+         * @return {undefined}
+         * @throws {Error}
+         */
         _notifyObservers2: function (event, data) {
             if (!event in this._observers2) {
                 throw new Error("Unknown event: " + event);
@@ -220,22 +302,42 @@
             }
         },
 
+        /**
+         * @param {Function} callback
+         * @return {undefined}
+         */
         onAdd: function (callback) {
             return this.addObserver2("add", callback);
         },
 
+        /**
+         * @param {Function} callback
+         * @return {undefined}
+         */
         onRemove: function (callback) {
             return this.addObserver2("remove", callback);
         },
 
+        /**
+         * @param {Function} callback
+         * @return {undefined}
+         */
         onUpdate: function (callback) {
             return this.addObserver2("update", callback);
         },
 
+        /**
+         * @param {Function} callback
+         * @return {undefined}
+         */
         onModify: function (callback) {
             return this.addObserver2("modify", callback);
         },
 
+        /**
+         * @param {wader.AModel} model
+         * @return {Boolean}
+         */
         has: function (model) {
             return this.getAll().indexOf(model) !== -1;
         }

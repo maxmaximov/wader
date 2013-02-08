@@ -1,16 +1,18 @@
-/**
- * Wader Abstract Deferred Module
- *
- * @author Max Maximov <max.maximov@gmail.com>
- * @version 0.3
- */
-(function(ns) {
+(function (ns) {
     "use strict";
 
-    /*
-    * @abstract wader.AModel
-    */
-    wader.IModule.extend("wader.ADeferredModule", {
+    /**
+     * @name wader.ADeferredModule
+     * @class Wader Abstract Deferred Module
+     * @abstract
+     * @implements wader.IModule
+     * @author Max Maximov <max.maximov@gmail.com>
+     * @version 0.3
+     */
+    wader.IModule.extend("wader.ADeferredModule",
+
+    /** @lends wader.ADeferredModule */
+    {
     });
 
     if (ns !== wader) ns.ADeferredModule = wader.ADeferredModule;

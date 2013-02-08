@@ -1,17 +1,23 @@
-/**
- * Base application class
- *
- * Contains various helper methods, store and handle "Controller" modules.
- *
- * @author Andrew Tereshko <andrew.tereshko@gmail.com>
- * @author Max Maximov <max.maximov@gmail.com>
- * @version 0.3
- */
-(function(ns) {
+(function (ns) {
     "use strict";
 
-    $.Class.extend("wader.App", {
-        /* @static */
+    /**
+     * @namespace Неймспейс
+     * @name wader
+     */
+
+    /**
+     * Contains various helper methods, store and handle "Controller" modules.
+     * @name wader.App
+     * @class Base application class
+     * @author Andrew Tereshko <andrew.tereshko@gmail.com>
+     * @author Max Maximov <max.maximov@gmail.com>
+     * @version 0.3
+     */
+    $.Class.extend("wader.App",
+
+    /** @lends wader.App */
+    {
         _instance: null,
         _timestamp: null,
         _timeout: 1000,
@@ -24,6 +30,9 @@
         _questions: [],
         _answers: {},
 
+        /**
+         * @return {wader.App}
+         */
         getInstance: function () {
             if (!wader.App._instance) {
                 wader.App._instance = new wader.App();
@@ -33,6 +42,11 @@
             return wader.App._instance;
         },
 
+        /**
+         * @param {String|jQuery} selector
+         * @param {Function} callback
+         * @return {jQuery.Deferred}
+         */
         when: function (selector, callback) {
             if (!wader.App._instance) throw new Error("[wader.App] класс должен быть инстанцирован");
 
@@ -61,6 +75,11 @@
             return deferred;
         },
 
+        /**
+         * @param {String} question
+         * @param {Function} callback
+         * @return {jQuery.Deferred}
+         */
         ask: function (question, callback) {
             if (!wader.App._instance) throw new Error("[wader.App] класс должен быть инстанцирован");
 
@@ -79,6 +98,11 @@
             return deferred;
         },
 
+        /**
+         * @param {String} question
+         * @param {*} data
+         * @return {undefined}
+         */
         answer: function (question, data) {
             if (!wader.App._instance) throw new Error("[wader.App] класс должен быть инстанцирован");
 
@@ -88,6 +112,9 @@
             wader.App._check();
         },
 
+        /**
+         * @return {undefined}
+         */
         _check: function () {
             var timestamp = new Date();
 
@@ -145,16 +172,14 @@
                 //Logger.warn("[wader.App] timeout (" + wader.App._timeout + " ms) expired.", { "ready": wader.App._instance._ready, "modules": wader.App._instance._modules, "modules to ready": wader.App._instance._modulesToReady, "selectors": wader.App._selectors, "questions": wader.App._questions });
             }
         }
-    }, {
-        /* @prototype */
+    },
+
+    /** @lends wader.App# */
+    {
         options: {
             routes: {}
         },
 
-        /**
-         * current Controller modules
-         *
-         */
         _modules: {},
 
         _modulesToReady: {},
@@ -168,7 +193,7 @@
 
             var history = window.History, url = history.getState().url;
 
-            if (window.location.toString().search(/#/) && !history.isTraditionalAnchor(history.getHash())) {
+/*            if (window.location.toString().search(/#/) && !history.isTraditionalAnchor(history.getHash())) {
                 if (history.getHash().search(/^\//)) {
                     window.location = history.getHash();
                 } else {
@@ -177,12 +202,18 @@
             } else {
                 // App run on every hash change
                 $(window).bind("statechange.wader", this.proxy("run"));
-            }
+            }*/
+
+            $(window).bind("statechange.wader", this.proxy("run"));
 
             Hub.sub("wader/module/ready", this.proxy("_onReadyModule"));
         },
 
-        setRoute: function(routes) {
+        /**
+         * @param {Object[]} routes
+         * @return {undefined}
+         */
+        setRoute: function (routes) {
             // Binding route rules to modules
             $.each(routes, function (moduleName, routes) {
                 $.each(routes, function (i, routeRule) {
@@ -191,6 +222,9 @@
             });
         },
 
+        /**
+         * @return {undefined}
+         */
         run: function () {
             Logger.log(this, "run");
 
@@ -221,7 +255,10 @@
             }
         },
 
-        cleanup: function() {
+        /**
+         * @return {undefined}
+         */
+        cleanup: function () {
             Logger.log(this, "cleanup");
 
             for (moduleName in this._modules) {
@@ -233,7 +270,11 @@
             this._unready();
         },
 
-        _registerModule: function(className) {
+        /**
+         * @param {String} className
+         * @return {Boolean}
+         */
+        _registerModule: function (className) {
             if (undefined === this._modules[className]) {
                 var classInstance = $.String.getObject(className , window, true);
 
@@ -253,6 +294,10 @@
             return this._modules[className] ? true : false;
         },
 
+        /**
+         * @param {String} className
+         * @return {undefined}
+         */
         _unregisterModule: function (className) {
             if (undefined === this._modules[className]) return false;
 
@@ -266,6 +311,11 @@
             delete(this._modules[className]);
         },
 
+        /**
+         * @param {String} className
+         * @param {String[]} params
+         * @return {undefined}
+         */
         _onLoadModule: function (className, params) {
             this._registerModule(className);
 
@@ -283,6 +333,10 @@
             //}
         },
 
+        /**
+         * @param {String} className
+         * @return {undefined}
+         */
         _onReadyModule: function (className) {
             Logger.log(this._modules[className], "ready");
 
@@ -299,6 +353,9 @@
             }
         },
 
+        /**
+         * @return {undefined}
+         */
         _unready: function () {
             Logger.log(this, "unready");
 
@@ -307,6 +364,10 @@
             wader.App._selectors = [];
         },
 
+        /**
+         * @param {String} moduleName
+         * @return {String}
+         */
         _getClassNameByModule: function (moduleName) {
             var nameChunks = moduleName.split("/"), nameChunkCount = nameChunks.length;
 
@@ -317,6 +378,10 @@
             return nameChunks.join(".");
         },
 
+        /**
+         * @param {String} className
+         * @return {String}
+         */
         _getModuleNameByClass: function (className) {
             var nameChunks = className.split( "." ), nameChunkCount = nameChunks.length;
 

@@ -1,17 +1,23 @@
-/**
- * Wader PubSub Hub
- *
- * @author Max Maximov <max.maximov@gmail.com>
- * @version 0.3
- */
-(function(ns) {
+(function (ns) {
     "use strict";
 
+    /**
+     * @name wader.Hub
+     * @class Wader PubSub Hub
+     * @author Max Maximov <max.maximov@gmail.com>
+     * @version 0.3
+     */
     $.Class.extend("wader.Hub",
-    /* @static */
+
+    /** @lends wader.Hub */
     {
         _domNode: $("<i/>"),
 
+        /**
+         * @param {String} channel
+         * @param {*} data
+         * @return {undefined}
+         */
         pub: function (channel, data) {
             data = data || {};
 
@@ -21,6 +27,11 @@
             this._domNode.trigger.apply(this._domNode, arguments);
         },
 
+        /**
+         * @param {String} channel
+         * @param {Function} callback
+         * @return {undefined}
+         */
         sub: function (channel, callback) {
             Logger.info("Subscribed to channel \"" + channel + "\"");
             //Logger.info(this, "subscribed to channel \"" + channel + "\"");
@@ -34,6 +45,11 @@
             this._domNode.bind(channel + ".wader", wrapper);
         },
 
+        /**
+         * @param {String} channel
+         * @param {Function} callback
+         * @return {undefined}
+         */
         unsub: function (channel, callback) {
             Logger.info("Unsubscribed from channel \"" + channel + "\"");
             //Logger.info(this, "unsubscribed from channel \"" + channel + "\"");
@@ -41,7 +57,8 @@
             this._domNode.unbind(channel + ".wader", callback);
         }
     },
-    /* @prototype */
+
+    /** @lends wader.Hub# */
     {
     });
 
